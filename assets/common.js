@@ -173,6 +173,32 @@
       return p && String(p).trim() ? `паспорт ${String(p).trim()}` : "паспорт серия ______ № __________, выдан ____________________________ «___» ________ ____ г.";
     },
 
+    // прожиточный минимум в целом по РФ на 2026 год — Федеральный закон от 28.11.2025 № 426-ФЗ (о бюджете);
+    // при смене года обновить (мониторинг напоминает)
+    PM: { year: 2026, working: 20644, pension: 16288, child: 18371, law: "Федеральный закон от 28.11.2025 № 426-ФЗ" },
+
+    // исполнительное производство: общие вопросы
+    ipQuestions(opts) {
+      const o = opts || {};
+      return [
+        { id: "osp", type: "text", label: "Отделение судебных приставов", hint: "Как в постановлении или на Госуслугах", placeholder: "Хамовнический ОСП ГУФССП России по г. Москве" },
+        { id: "osp_address", type: "text", label: "Адрес отделения", required: false },
+        { id: "bailiff", type: "text", label: "Судебный пристав-исполнитель", required: o.bailiffRequired !== false, hint: "Фамилия и инициалы — есть в постановлении", placeholder: "Иванова А. А." },
+        { id: "ip_no", type: "text", label: "Номер исполнительного производства", placeholder: "123456/26/77001-ИП" },
+        { id: "ip_date", type: "date", label: "Дата возбуждения", required: false },
+        { id: "creditor", type: "text", label: "Взыскатель", required: o.creditorRequired !== false, placeholder: "ПАО «Банк»" },
+      ];
+    },
+    ipLine(a) {
+      return `исполнительное производство № ${F(a.ip_no, "номер ИП")}` + (U.date(a.ip_date) ? ` от ${U.fmtDate(U.date(a.ip_date))}` : "");
+    },
+    // шапка заявления в ФССП: to — строка адресата
+    fsspHeader(P, a, to, role) {
+      P.push({ text: to + `\n${F(a.osp, "отделение судебных приставов")}` + (a.osp_address ? `\nАдрес: ${a.osp_address}` : ""), align: "left", leftIndent: 4500, after: 120 });
+      P.push({ text: `${role || "Должник"}: ${F(a.buyer_name, "ваши ФИО")}` + (U.date(a.buyer_birth) ? `, ${U.fmtDate(U.date(a.buyer_birth))} г. р.` : "") + `\nАдрес: ${F(a.buyer_address, "адрес")}\nТел.: ${F(a.buyer_phone, "телефон")}` + (a.buyer_email ? `, e-mail: ${a.buyer_email}` : ""), align: "left", leftIndent: 4500, after: 120 });
+      P.push({ text: `Исполнительное производство № ${F(a.ip_no, "номер ИП")}` + (a.creditor ? `\nВзыскатель: ${a.creditor}` : ""), align: "left", leftIndent: 4500, after: 360 });
+    },
+
     guideSend: { title: "Вручите претензию под подпись или отправьте ценным письмом с описью вложения.", text: "На вашем экземпляре должны быть дата, подпись и должность сотрудника. Сохраните квитанцию и трек-номер." },
     guideCourt: { title: "Не выполнили в срок.", text: "Жалоба в Роспотребнадзор и иск в суд по месту вашего жительства; госпошлину потребитель не платит при цене иска до 1 млн ₽." },
   };
