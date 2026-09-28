@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="../assets/site.css">
 </head>
-<body>
+<body data-doc="d01">
 <div class="wrap">
   <header class="top">
     <a class="logo" href="../index.html">юр<span>платформа</span></a>
@@ -22,13 +22,6 @@
 <script src="../assets/docx.js"></script>
 <script src="../assets/engine.js"></script>
 <script src="../content/d01.js"></script>
-<script>
-(function () {
-  var spec = DOCS.d01, head = document.getElementById("head");
-  head.innerHTML = '<div class="code">' + spec.code + '</div><h1>' + spec.title + '</h1><p>' + spec.lead + '</p>' +
-    (spec.status === "draft" ? '<div class="draft">Черновик: документ ещё не проверен юристом</div>' : "");
-  Engine.mount(document.getElementById("app"), spec);
-})();
-</script>
+<script src="../assets/page.js"></script>
 </body>
 </html>
