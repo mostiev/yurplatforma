@@ -14,7 +14,7 @@ window.CATALOG = {
     {"id": "d10", "code": "Д-10", "title": "Претензия автосервису", "section": "consumer", "kind": "doc", "live": true},
     {"id": "d11", "code": "Д-11", "title": "Возврат за платные медуслуги и стоматологию", "section": "consumer", "kind": "doc", "live": true},
     {"id": "d12", "code": "Д-12", "title": "Договор найма квартиры", "section": "housing", "kind": "doc", "live": true},
-    {"id": "d13", "code": "Д-13", "title": "Акт приёма-передачи квартиры с описью", "section": "housing", "kind": "doc", "live": false},
+    {"id": "d13", "code": "Д-13", "title": "Акт приёма-передачи квартиры с описью", "section": "housing", "kind": "doc", "live": true},
     {"id": "d14", "code": "Д-14", "title": "Претензия о возврате залога за квартиру", "section": "housing", "kind": "doc", "live": false},
     {"id": "d15", "code": "Д-15", "title": "Заявление на перерасчёт платы за ЖКУ", "section": "housing", "kind": "doc", "live": false},
     {"id": "d16", "code": "Д-16", "title": "Жалоба на УК в жилинспекцию", "section": "housing", "kind": "doc", "live": false},

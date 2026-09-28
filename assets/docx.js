@@ -124,7 +124,19 @@
       `<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>` +
       `<Default Extension="xml" ContentType="application/xml"/>` +
       `<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>` +
+      `<Override PartName="/word/settings.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.settings+xml"/>` +
       `</Types>`;
+    // doNotExpandShiftReturn: в абзацах по ширине не растягивать строку перед ручным переносом (списки внутри абзаца)
+    const settingsXml =
+      `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>` +
+      `<w:settings xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">` +
+      `<w:compat><w:doNotExpandShiftReturn/></w:compat>` +
+      `</w:settings>`;
+    const docRels =
+      `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>` +
+      `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">` +
+      `<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/settings" Target="settings.xml"/>` +
+      `</Relationships>`;
     const rels =
       `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>` +
       `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">` +
@@ -134,6 +146,8 @@
       { name: "[Content_Types].xml", data: contentTypes },
       { name: "_rels/.rels", data: rels },
       { name: "word/document.xml", data: documentXml },
+      { name: "word/_rels/document.xml.rels", data: docRels },
+      { name: "word/settings.xml", data: settingsXml },
     ]);
   }
 
