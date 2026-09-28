@@ -13,7 +13,7 @@
     LAW_ZOZPP,
     // шапка: to = {name, inn, address, email}, from = {name, address, phone, email}
     header(to, from, P) {
-      P.push({ text: `Кому: ${F(to.name, to.nameLabel || "адресат")}` + (to.inn ? `\nИНН ${to.inn}` : "") + `\nАдрес: ${F(to.address, "адрес")}` + (to.email ? `\nE-mail: ${to.email}` : "") + (to.copy ? `\nКопия: ${to.copy}` : ""), align: "left", leftIndent: 4500, after: 120 });
+      P.push({ text: `Кому: ${F(to.name, to.nameLabel || "адресат")}` + (to.inn ? `\nИНН ${to.inn}` : "") + `\nАдрес: ${to.blank && !to.address ? "______________________________" : F(to.address, "адрес")}` + (to.email ? `\nE-mail: ${to.email}` : "") + (to.copy ? `\nКопия: ${to.copy}` : ""), align: "left", leftIndent: 4500, after: 120 });
       P.push({ text: `От: ${F(from.name, "ваши ФИО")}\nАдрес: ${F(from.address, "ваш адрес")}\nТел.: ${F(from.phone, "телефон")}` + (from.email ? `, e-mail: ${from.email}` : ""), align: "left", leftIndent: 4500, after: 360 });
     },
     title(P, word, subtitle) {
