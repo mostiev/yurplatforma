@@ -6,7 +6,7 @@ module.exports = function load(id) {
   const ctx = { TextEncoder, console, Date };
   ctx.globalThis = ctx;
   vm.createContext(ctx);
-  for (const f of ["assets/docx.js", "assets/engine.js", "assets/common.js", `content/${id}.js`]) {
+  for (const f of ["assets/docx.js", "assets/engine.js", "assets/keyrate.js", "assets/common.js", `content/${id}.js`]) {
     vm.runInContext(fs.readFileSync(path.join(__dirname, "..", f), "utf8"), ctx, { filename: f });
   }
   const { Engine, DOCS, Docx } = ctx;

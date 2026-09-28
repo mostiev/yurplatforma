@@ -57,6 +57,30 @@
       }[kind || "none"];
       return `В случае неудовлетворения требования в установленный срок я буду вынужден(а) обратиться в суд и потребую также взыскать ${extra}компенсацию морального вреда (ст. 15 Закона) и штраф в размере 50% от присуждённой суммы (п. 6 ст. 13 Закона).`;
     },
+    // ключевая ставка на дату (Date) по таблице assets/keyrate.js
+    keyRate(dt) {
+      const t = global.KEYRATE || [];
+      let r = null;
+      for (const [from, rate] of t) { if (U.date(from) <= dt) r = rate; else break; }
+      return r;
+    },
+    // компенсация по ст. 236 ТК: сумма × 1/150 ключевой ставки за каждый день с (срок + 1) по дату расчёта включительно
+    comp236(amount, due, payDay) {
+      if (!(amount > 0) || !due || !payDay || payDay <= due) return { total: 0, days: 0, parts: [] };
+      const parts = [];
+      let d = U.addDays(due, 1), total = 0, days = 0;
+      while (d <= payDay) {
+        const rate = C.keyRate(d);
+        if (rate == null) return { total: null, days: 0, parts: [], error: "нет ставки на " + U.fmtDate(d) };
+        const add = amount * rate / 100 / 150;
+        const last = parts[parts.length - 1];
+        if (last && last.rate === rate) { last.days++; last.to = d; last.sum += add; } else parts.push({ from: d, to: d, days: 1, rate, sum: add });
+        total += add; days++;
+        d = U.addDays(d, 1);
+      }
+      parts.forEach(p => p.sum = Math.round(p.sum * 100) / 100);
+      return { total: Math.round(total * 100) / 100, days, parts };
+    },
     guideSend: { title: "Вручите претензию под подпись или отправьте ценным письмом с описью вложения.", text: "На вашем экземпляре должны быть дата, подпись и должность сотрудника. Сохраните квитанцию и трек-номер." },
     guideCourt: { title: "Не выполнили в срок.", text: "Жалоба в Роспотребнадзор и иск в суд по месту вашего жительства; госпошлину потребитель не платит при цене иска до 1 млн ₽." },
   };

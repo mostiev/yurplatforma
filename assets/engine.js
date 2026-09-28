@@ -64,7 +64,9 @@
     if (empty) return required ? "Заполните это поле" : null;
     if (q.type === "date" && !U.date(v)) return "Укажите дату";
     if ((q.type === "money" || q.type === "number") && (isNaN(v) || Number(v) < (q.min ?? 0))) return "Укажите число";
-    if (q.options) {
+    if (q.type === "multi") {
+      if (!Array.isArray(v) || v.some(x => !q.options.find(o => o.value === x))) return "Выберите варианты";
+    } else if (q.options) {
       const opt = q.options.find(o => o.value === v);
       if (!opt) return "Выберите вариант";
       if (optionState(q, opt, a, d)) return "Этот вариант недоступен в вашей ситуации";
@@ -163,6 +165,21 @@
               opt.hint ? h("span", { class: "choice-h" }, opt.hint) : null,
               reason ? h("span", { class: "choice-r" }, reason) : null);
           }));
+      } else if (q.type === "multi") {
+        // несколько вариантов: значение — массив
+        const cur = Array.isArray(v) ? v : [];
+        control = h("div", { class: "choices", role: "group", "aria-labelledby": id + "-l" },
+          q.options.map(opt => h("label", { class: "choice" + (cur.includes(opt.value) ? " on" : "") },
+            h("input", {
+              type: "checkbox", name: id, value: opt.value, checked: cur.includes(opt.value),
+              onchange: e => {
+                state.touched[q.id] = true;
+                const next = e.target.checked ? cur.concat(opt.value) : cur.filter(x => x !== opt.value);
+                set(q.id, next.length ? q.options.map(o => o.value).filter(x => next.includes(x)) : undefined);
+              },
+            }),
+            h("span", { class: "choice-t" }, opt.label),
+            opt.hint ? h("span", { class: "choice-h" }, opt.hint) : null)));
       } else if (q.type === "select") {
         control = h("select", {
           id, onchange: e => { state.touched[q.id] = true; set(q.id, e.target.value); },
