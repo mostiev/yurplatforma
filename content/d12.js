@@ -64,7 +64,7 @@
       {
         id: "terms", title: "Условия",
         questions: [
-          { id: "start_date", type: "date", label: "С какого дня начинается найм?" },
+          { id: "start_date", type: "date", future: true, label: "С какого дня начинается найм?" },
           { id: "term_months", type: "choice", label: "На какой срок?", hint: "Договор на год и больше нужно регистрировать в Росреестре. Поэтому чаще всего заключают на 11 месяцев", options: [
             { value: 11, label: "11 месяцев — без регистрации" },
             { value: 6, label: "6 месяцев" },

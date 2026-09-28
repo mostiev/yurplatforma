@@ -81,6 +81,98 @@
       parts.forEach(p => p.sum = Math.round(p.sum * 100) / 100);
       return { total: Math.round(total * 100) / 100, days, parts };
     },
+    // производственный календарь (assets/calendar.js); вне охваченных лет — только субботы и воскресенья
+    isWorkday(dt) {
+      const cal = global.WORKCAL;
+      const s = U.iso(dt);
+      if (cal && cal.on.includes(s)) return true;
+      if (cal && cal.off.includes(s)) return false;
+      return dt.getDay() !== 0 && dt.getDay() !== 6;
+    },
+    calCovers(dt) { return !!(global.WORKCAL && dt && global.WORKCAL.years.includes(dt.getFullYear())); },
+    // n-й рабочий день после события (срок начинается на следующий день — ст. 107 ГПК, ст. 191 ГК)
+    addWorkdays(start, n) {
+      let d = start, k = 0;
+      while (d && k < n) { d = U.addDays(d, 1); if (C.isWorkday(d)) k++; }
+      return d;
+    },
+    // ст. 193 ГК: срок, который кончается в нерабочий день, переносится на ближайший рабочий
+    nextWorkday(dt) { let d = dt; while (d && !C.isWorkday(d)) d = U.addDays(d, 1); return d; },
+
+    // проценты по ст. 395 ГК: долг × ключевая ставка / число дней в году (365 или 366) за каждый день просрочки.
+    // Первый день — from, последний — to включительно (день уплаты входит). payments: [{date, amount}] уменьшают долг
+    // после дня платежа. Возвращает {total, days, parts:[{from,to,days,rate,base,yearDays,sum}], rest}
+    comp395(amount, from, to, payments) {
+      if (!(amount > 0) || !from || !to || to < from) return { total: 0, days: 0, parts: [], rest: amount > 0 ? amount : 0 };
+      const pays = (payments || []).filter(p => p.date && p.amount > 0).sort((x, y) => x.date - y.date);
+      let base = amount;
+      pays.filter(p => p.date < from).forEach(p => base -= p.amount);
+      const parts = [];
+      let d = from, total = 0, days = 0;
+      while (d <= to && base > 0) {
+        const rate = C.keyRate(d);
+        if (rate == null) return { total: null, days: 0, parts: [], rest: base, error: "нет ставки на " + U.fmtDate(d) };
+        const y = d.getFullYear(), yearDays = (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0 ? 366 : 365;
+        const add = base * rate / 100 / yearDays;
+        const last = parts[parts.length - 1];
+        if (last && last.rate === rate && last.base === base && last.yearDays === yearDays) { last.days++; last.to = d; last.sum += add; }
+        else parts.push({ from: d, to: d, days: 1, rate, base, yearDays, sum: add });
+        total += add; days++;
+        // платёж в этот день: проценты за день начислены, со следующего дня база меньше
+        pays.filter(p => U.iso(p.date) === U.iso(d)).forEach(p => base -= p.amount);
+        d = U.addDays(d, 1);
+      }
+      parts.forEach(p => p.sum = Math.round(p.sum * 100) / 100);
+      return { total: Math.round(total * 100) / 100, days, parts, rest: Math.max(0, Math.round(base * 100) / 100) };
+    },
+
+    // 150000 → «150 000 (сто пятьдесят тысяч) рублей»; 1500,5 → «1 500 (одна тысяча пятьсот) рублей 50 копеек»
+    rubles(n) {
+      if (n == null || isNaN(n)) return F(null, "сумма");
+      const v = Math.round(Number(n) * 100);
+      const r = Math.floor(v / 100), k = v % 100;
+      const plural = (x, one, few, many) => { const a = x % 100, b = x % 10; return a >= 11 && a <= 14 ? many : b === 1 ? one : b >= 2 && b <= 4 ? few : many; };
+      let s = `${U.money(r)} (${C.words(r)}) ${plural(r, "рубль", "рубля", "рублей")}`;
+      if (k) s += ` ${String(k).padStart(2, "0")} ${plural(k, "копейка", "копейки", "копеек")}`;
+      return s;
+    },
+    words(n) {
+      if (n === 0) return "ноль";
+      const ones = [["", "один", "два", "три", "четыре", "пять", "шесть", "семь", "восемь", "девять"], ["", "одна", "две", "три", "четыре", "пять", "шесть", "семь", "восемь", "девять"]];
+      const teens = ["десять", "одиннадцать", "двенадцать", "тринадцать", "четырнадцать", "пятнадцать", "шестнадцать", "семнадцать", "восемнадцать", "девятнадцать"];
+      const tens = ["", "", "двадцать", "тридцать", "сорок", "пятьдесят", "шестьдесят", "семьдесят", "восемьдесят", "девяносто"];
+      const hundreds = ["", "сто", "двести", "триста", "четыреста", "пятьсот", "шестьсот", "семьсот", "восемьсот", "девятьсот"];
+      const groups = [[null, 0], [["тысяча", "тысячи", "тысяч"], 1], [["миллион", "миллиона", "миллионов"], 0], [["миллиард", "миллиарда", "миллиардов"], 0]];
+      const out = [];
+      let g = 0;
+      while (n > 0 && g < groups.length) {
+        const x = n % 1000; n = Math.floor(n / 1000);
+        if (x) {
+          const w = [hundreds[Math.floor(x / 100)]];
+          const t = x % 100;
+          if (t >= 10 && t < 20) w.push(teens[t - 10]); else { w.push(tens[Math.floor(t / 10)]); w.push(ones[groups[g][1]][t % 10]); }
+          if (groups[g][0]) { const a = t, b = x % 10; w.push(a >= 11 && a <= 14 ? groups[g][0][2] : b === 1 ? groups[g][0][0] : b >= 2 && b <= 4 ? groups[g][0][1] : groups[g][0][2]); }
+          out.unshift(w.filter(Boolean).join(" "));
+        }
+        g++;
+      }
+      return out.join(" ");
+    },
+    // «ДД.ММ.ГГГГ; сумма» построчно → [{date, amount, raw}]
+    parseDatedSums(text) {
+      return String(text || "").split("\n").map(s => s.trim()).filter(Boolean).map(line => {
+        const p = line.split(/\s*;\s*/);
+        const m = /^(\d{2})\.(\d{2})\.(\d{4})$/.exec(p[0] || "");
+        const date = m ? U.date(`${m[3]}-${m[2]}-${m[1]}`) : null;
+        const amount = Number(String(p[1] || "").replace(/\s/g, "").replace(",", "."));
+        return { date, amount: isFinite(amount) && amount > 0 ? amount : null, raw: line };
+      });
+    },
+    // паспорт одной строкой или линии для заполнения от руки
+    passport(p) {
+      return p && String(p).trim() ? `паспорт ${String(p).trim()}` : "паспорт серия ______ № __________, выдан ____________________________ «___» ________ ____ г.";
+    },
+
     guideSend: { title: "Вручите претензию под подпись или отправьте ценным письмом с описью вложения.", text: "На вашем экземпляре должны быть дата, подпись и должность сотрудника. Сохраните квитанцию и трек-номер." },
     guideCourt: { title: "Не выполнили в срок.", text: "Жалоба в Роспотребнадзор и иск в суд по месту вашего жительства; госпошлину потребитель не платит при цене иска до 1 млн ₽." },
   };

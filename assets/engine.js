@@ -197,7 +197,8 @@
         control = h("input", {
           id, type, placeholder: q.placeholder || "", inputmode: q.type === "money" ? "decimal" : null,
           min: q.type === "money" || q.type === "number" ? (q.min ?? 0) : null, step: q.type === "money" ? "0.01" : null,
-          max: q.type === "date" ? U.iso(U.today()) : null,
+          // по умолчанию дата — прошедшее событие; future: true — можно выбрать будущую дату
+          max: q.type === "date" && !q.future ? U.iso(U.today()) : null,
           autocomplete: q.autocomplete || null,
           oninput: e => {
             const raw = e.target.value;
@@ -226,13 +227,16 @@
 
       if (state.done) { renderDone(d); return; }
 
-      const step = spec.steps[state.step];
+      // шаг можно скрыть целиком: step.show(a, d)
+      const steps = spec.steps.filter(s => !s.show || s.show(a, d));
+      if (state.step > steps.length - 1) state.step = steps.length - 1;
+      const step = steps[state.step];
       const errs = stepErrors(spec, step, a);
       const stop = spec.stop ? spec.stop(a, d) : null;
 
       add($form,
         h("ol", { class: "steps", "aria-label": "Шаги" },
-          spec.steps.map((s, i) => h("li", { class: i === state.step ? "cur" : i < state.step ? "past" : "" },
+          steps.map((s, i) => h("li", { class: i === state.step ? "cur" : i < state.step ? "past" : "" },
             h("span", { class: "n" }, String(i + 1)), h("span", { class: "t" }, s.title)))),
         h("h2", { class: "step-title" }, step.title),
         step.lead ? h("p", { class: "step-lead" }, step.lead) : null,
@@ -251,10 +255,11 @@
                 if (first) first.scrollIntoView({ block: "center", behavior: "smooth" });
                 return;
               }
-              if (state.step < spec.steps.length - 1) state.step++; else state.done = true;
+              const now = spec.steps.filter(s => !s.show || s.show(state.a, spec.derive(state.a)));
+              if (state.step < now.length - 1) state.step++; else state.done = true;
               renderForm(true); renderPreview();
             },
-          }, state.step < spec.steps.length - 1 ? "Далее" : "Собрать документ")));
+          }, state.step < steps.length - 1 ? "Далее" : "Собрать документ")));
 
       if (active) { const el = document.getElementById(active); if (el) el.focus(); }
       if (focusTop) $form.scrollIntoView({ block: "start", behavior: "smooth" });
@@ -287,7 +292,7 @@
             },
           }, "Скачать .docx"),
           copyBtn,
-          h("button", { class: "btn ghost", type: "button", onclick: () => { state.done = false; state.step = spec.steps.length - 1; renderForm(true); } }, "Изменить ответы")),
+          h("button", { class: "btn ghost", type: "button", onclick: () => { state.done = false; state.step = spec.steps.filter(s => !s.show || s.show(state.a, spec.derive(state.a))).length - 1; renderForm(true); } }, "Изменить ответы")),
         guide.length ? h("div", { class: "guide" },
           h("h3", {}, "Что делать дальше"),
           h("ol", {}, guide.map(g => h("li", {}, h("strong", {}, g.title), " ", g.text)))) : null,

@@ -39,7 +39,7 @@
       {
         id: "when", title: "Когда",
         questions: [
-          { id: "submit_date", type: "date", label: "Когда вы подадите заявление?", hint: "Две недели отсчитываются со следующего дня после того, как работодатель получит заявление" },
+          { id: "submit_date", type: "date", future: true, label: "Когда вы подадите заявление?", hint: "Две недели отсчитываются со следующего дня после того, как работодатель получит заявление" },
           { id: "mode", type: "choice", label: "Как хотите уволиться?", options: [
             { value: "standard", label: "Через две недели (с отработкой)" },
             { value: "agreement", label: "Раньше — договорился(ась) с работодателем" },
@@ -47,7 +47,7 @@
           ] },
           { id: "reason", type: "select", label: "Почему не можете продолжать работу?", show: a => a.mode === "impossible", options: Object.entries(IMPOSSIBLE).map(([value, label]) => ({ value, label: label[0].toUpperCase() + label.slice(1) })) },
           { id: "reason_desc", type: "text", label: "Коротко: что именно и чем подтверждается", required: false, placeholder: "Задержка зарплаты за июль и август, подтверждено ответом ГИТ № 123", show: a => a.mode === "impossible" },
-          { id: "last_day", type: "date", label: "Последний рабочий день (дата увольнения)",
+          { id: "last_day", type: "date", future: true, label: "Последний рабочий день (дата увольнения)",
             validate: (v, a) => {
               const s = U.date(a.submit_date), l = U.date(v);
               if (s && l && l < s) return "Не раньше даты подачи";

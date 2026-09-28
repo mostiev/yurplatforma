@@ -55,7 +55,7 @@
           ] },
           { id: "contract_date", type: "date", label: "Дата договора найма" },
           { id: "address", type: "text", label: "Адрес", placeholder: "г. Москва, ул. Ленина, д. 5, кв. 7" },
-          { id: "act_date", type: "date", label: "Дата акта" },
+          { id: "act_date", type: "date", future: true, label: "Дата акта" },
           { id: "keys", type: "number", label: "Сколько комплектов ключей?", min: 0 },
           { id: "keys_desc", type: "text", label: "Что в комплекте?", required: false, placeholder: "ключ от входной двери, домофонный чип, ключ от почтового ящика" },
         ],

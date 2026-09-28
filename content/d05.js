@@ -69,7 +69,7 @@
             { value: "international", label: "Международный", hint: "Документ составим, но к таким рейсам могут применяться международные конвенции — лучше показать его юристу" },
           ] },
           { id: "flight_no", type: "text", label: "Номер рейса", placeholder: "SU 1234" },
-          { id: "flight_date", type: "date", label: "Дата вылета по билету" },
+          { id: "flight_date", type: "date", future: true, label: "Дата вылета по билету" },
           { id: "route", type: "text", label: "Маршрут", placeholder: "Москва (Шереметьево) — Сочи" },
           { id: "ticket_no", type: "text", label: "Номер билета или бронирования", placeholder: "555 1234567890 или код брони ABC123" },
           { id: "passengers", type: "text", label: "Пассажиры в этом билете", placeholder: "Петров Пётр Петрович, Петрова Анна Ивановна" },

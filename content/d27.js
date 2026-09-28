@@ -63,7 +63,7 @@
           { id: "suspend", type: "choice", label: "Приостановить работу до выплаты?", hint: "Закон разрешает, если задержка больше 15 дней: вы не выходите на работу, а средний заработок сохраняется. Нельзя в армии, экстренных службах, на госслужбе и в некоторых других сферах",
             show: (a, d) => a.dismissed === "working" && a.paid === "no" && d.maxDelay > 15,
             options: [{ value: "yes", label: "Да, приостанавливаю" }, { value: "no", label: "Нет" }] },
-          { id: "suspend_from", type: "date", label: "С какого дня приостанавливаете?", show: a => a.suspend === "yes" },
+          { id: "suspend_from", type: "date", future: true, label: "С какого дня приостанавливаете?", show: a => a.suspend === "yes" },
         ],
       },
       {

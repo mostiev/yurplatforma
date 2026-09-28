@@ -28,6 +28,7 @@ const html = `<!doctype html>
 <script src="../assets/docx.js"></script>
 <script src="../assets/engine.js"></script>
 <script src="../assets/keyrate.js"></script>
+<script src="../assets/calendar.js"></script>
 <script src="../assets/common.js"></script>
 <script src="../content/${id}.js"></script>
 <script src="../assets/page.js"></script>

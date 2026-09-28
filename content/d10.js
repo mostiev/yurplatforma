@@ -55,7 +55,7 @@
           { id: "fix_days", type: "number", label: "За сколько дней исправить?", suffix: "дн.", min: 1, show: a => a.situation === "quality" && a.demand === "fix" },
           { id: "amount", type: "money", label: "На сколько уменьшить цену?", suffix: "₽", min: 1, show: a => a.situation === "quality" && a.demand === "price_cut" },
           { id: "amount", type: "money", label: "Сколько заплатили другому сервису?", suffix: "₽", min: 1, show: a => a.situation === "quality" && a.demand === "costs" },
-          { id: "deadline_date", type: "date", label: "Какой срок ремонта был в заказ-наряде?", show: a => a.situation === "delay" },
+          { id: "deadline_date", type: "date", future: true, label: "Какой срок ремонта был в заказ-наряде?", show: a => a.situation === "delay" },
           { id: "delay_demand", type: "choice", label: "Чего вы хотите?", show: a => a.situation === "delay", options: [
             { value: "new_term", label: "Закончить ремонт в новый срок" },
             { value: "refuse", label: "Отказаться от ремонта, вернуть деньги и машину" },
