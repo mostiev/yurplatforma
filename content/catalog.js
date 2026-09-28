@@ -6,7 +6,7 @@ window.CATALOG = {
     {"id": "d02", "code": "Д-02", "title": "Возврат товара надлежащего качества", "section": "consumer", "kind": "doc", "live": true},
     {"id": "d03", "code": "Д-03", "title": "Возврат денег за онлайн-курс", "section": "consumer", "kind": "doc", "live": true},
     {"id": "d04", "code": "Д-04", "title": "Претензия за некачественную услугу или работу", "section": "consumer", "kind": "doc", "live": true},
-    {"id": "d05", "code": "Д-05", "title": "Возврат за отменённый или задержанный рейс", "section": "consumer", "kind": "doc", "live": false},
+    {"id": "d05", "code": "Д-05", "title": "Возврат за отменённый или задержанный рейс", "section": "consumer", "kind": "doc", "live": true},
     {"id": "d06", "code": "Д-06", "title": "Претензия маркетплейсу", "section": "consumer", "kind": "doc", "live": false},
     {"id": "d07", "code": "Д-07", "title": "Расторжение договора с фитнес-клубом или салоном", "section": "consumer", "kind": "doc", "live": true},
     {"id": "d08", "code": "Д-08", "title": "Отмена подписки и возврат автосписаний", "section": "consumer", "kind": "doc", "live": true},
