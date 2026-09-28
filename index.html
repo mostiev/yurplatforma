@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Юрплатформа — документы для защиты своих прав</title>
+<meta name="description" content="Претензии, заявления и договоры по вашей ситуации: отвечаете на вопросы — получаете готовый документ по закону РФ.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="logo" href="index.html">юр<span>платформа</span></a>
+    <nav>рабочая версия</nav>
+  </header>
+
+  <section class="hero">
+    <h1>Документ для вашей ситуации за 10 минут</h1>
+    <p>Отвечаете на вопросы — получаете претензию, заявление или договор по закону РФ. Документ собирается у вас в браузере, данные никуда не отправляются.</p>
+  </section>
+
+  <div class="search"><input id="q" type="search" placeholder="Что случилось? Например: вернуть деньги за курс" aria-label="Поиск документа"></div>
+  <main class="sections" id="sections"></main>
+
+  <footer class="site">Документы составляются по вашим ответам и не являются юридической консультацией.</footer>
+</div>
+<script src="content/catalog.js"></script>
+<script>
+(function () {
+  var root = document.getElementById("sections"), q = document.getElementById("q");
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function render() {
+    var term = q.value.trim().toLowerCase();
+    var html = CATALOG.sections.map(function (s) {
+      var items = CATALOG.items.filter(function (i) { return i.section === s.key && (!term || i.title.toLowerCase().indexOf(term) >= 0 || s.name.toLowerCase().indexOf(term) >= 0); });
+      if (!items.length) return "";
+      items.sort(function (a, b) { return (b.live ? 1 : 0) - (a.live ? 1 : 0); });
+      return '<section class="sec"><h2>' + esc(s.name) + '</h2><p class="lead">' + esc(s.lead) + '</p><ul>' +
+        items.map(function (i) {
+          return i.live
+            ? '<li><a href="d/' + i.id + '.html"><span class="t">' + esc(i.title) + '</span><span class="tag">' + (i.kind === "calc" ? "посчитать" : "составить") + '</span></a></li>'
+            : '<li><span class="soon"><span class="t">' + esc(i.title) + '</span><span class="tag">скоро</span></span></li>';
+        }).join("") + '</ul></section>';
+    }).join("");
+    root.innerHTML = html || '<p class="empty">Такого документа пока нет. Попробуйте сформулировать иначе.</p>';
+  }
+  q.addEventListener("input", render);
+  render();
+})();
+</script>
+</body>
+</html>
