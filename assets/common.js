@@ -199,6 +199,59 @@
       P.push({ text: `Исполнительное производство № ${F(a.ip_no, "номер ИП")}` + (a.creditor ? `\nВзыскатель: ${a.creditor}` : ""), align: "left", leftIndent: 4500, after: 360 });
     },
 
+    // самозанятый (исполнитель) и заказчик: общие вопросы для Д-29…Д-32
+    freelancerQuestions() {
+      return [
+        { id: "ex_name", type: "text", label: "Ваши ФИО (исполнитель)" },
+        { id: "ex_inn", type: "text", label: "Ваш ИНН", validate: v => /^\d{12}$/.test(String(v).trim()) ? null : "ИНН физлица — 12 цифр" },
+        { id: "ex_address", type: "text", label: "Ваш адрес" },
+        { id: "ex_phone", type: "tel", label: "Телефон" },
+        { id: "ex_email", type: "email", label: "E-mail", required: false },
+        { id: "ex_bank", type: "text", label: "Банк", placeholder: "АО «Т-Банк»" },
+        { id: "ex_account", type: "text", label: "Номер счёта", hint: "20 цифр", validate: v => /^\d{20}$/.test(String(v).replace(/\s/g, "")) ? null : "Номер счёта — 20 цифр" },
+        { id: "ex_bik", type: "text", label: "БИК", validate: v => /^\d{9}$/.test(String(v).trim()) ? null : "БИК — 9 цифр" },
+        { id: "ex_corr", type: "text", label: "Корреспондентский счёт", required: false },
+      ];
+    },
+    clientQuestions() {
+      return [
+        { id: "cl_type", type: "choice", label: "Заказчик — это", options: [
+          { value: "org", label: "Организация или ИП" },
+          { value: "person", label: "Физическое лицо" },
+        ] },
+        { id: "cl_name", type: "text", label: "Заказчик", placeholder: "ООО «Ромашка» или Иванов Иван Иванович" },
+        { id: "cl_inn", type: "text", label: "ИНН заказчика", show: a => a.cl_type === "org", validate: v => /^\d{10}(\d{2})?$/.test(String(v).trim()) ? null : "ИНН — 10 или 12 цифр" },
+        { id: "cl_ogrn", type: "text", label: "ОГРН / ОГРНИП", required: false, show: a => a.cl_type === "org" },
+        { id: "cl_address", type: "text", label: "Адрес заказчика" },
+        { id: "cl_signer", type: "text", label: "Кто подписывает от заказчика", show: a => a.cl_type === "org", placeholder: "Генеральный директор Иванов Иван Иванович, действующий на основании Устава" },
+      ];
+    },
+    exLine(a) {
+      return `${F(a.ex_name, "ФИО исполнителя")}, ИНН ${F(a.ex_inn, "ИНН")}, применяющий(ая) специальный налоговый режим «Налог на профессиональный доход»`;
+    },
+    clLine(a) {
+      return a.cl_type === "org"
+        ? `${F(a.cl_name, "заказчик")}, ИНН ${F(a.cl_inn, "ИНН")}` + (a.cl_ogrn ? `, ОГРН ${a.cl_ogrn}` : "") + `, в лице ${F(a.cl_signer, "кто подписывает")}`
+        : `${F(a.cl_name, "заказчик")}`;
+    },
+    exRequisites(a) {
+      return `${F(a.ex_name, "ФИО")}\nИНН ${F(a.ex_inn, "ИНН")}\nАдрес: ${F(a.ex_address, "адрес")}\nТел.: ${F(a.ex_phone, "телефон")}` + (a.ex_email ? `, e-mail: ${a.ex_email}` : "") +
+        `\nСчёт № ${F(a.ex_account ? String(a.ex_account).replace(/\s/g, "") : null, "счёт")} в ${F(a.ex_bank, "банк")}\nБИК ${F(a.ex_bik, "БИК")}` + (a.ex_corr ? `, к/с ${a.ex_corr}` : "");
+    },
+    clRequisites(a) {
+      return `${F(a.cl_name, "заказчик")}` + (a.cl_type === "org" ? `\nИНН ${F(a.cl_inn, "ИНН")}` + (a.cl_ogrn ? `, ОГРН ${a.cl_ogrn}` : "") : "") + `\nАдрес: ${F(a.cl_address, "адрес")}`;
+    },
+    // «наименование; количество; цена» построчно
+    parseLines(text) {
+      return String(text || "").split("\n").map(s => s.trim()).filter(Boolean).map(line => {
+        const p = line.split(/\s*;\s*/);
+        const num = s => { const n = Number(String(s || "").replace(/\s/g, "").replace(",", ".")); return isFinite(n) && n > 0 ? n : null; };
+        const qty = p.length >= 3 ? num(p[1]) : 1;
+        const price = num(p.length >= 3 ? p[2] : p[1]);
+        return { name: p[0], qty, price, sum: qty && price ? Math.round(qty * price * 100) / 100 : null, raw: line };
+      });
+    },
+
     guideSend: { title: "Вручите претензию под подпись или отправьте ценным письмом с описью вложения.", text: "На вашем экземпляре должны быть дата, подпись и должность сотрудника. Сохраните квитанцию и трек-номер." },
     guideCourt: { title: "Не выполнили в срок.", text: "Жалоба в Роспотребнадзор и иск в суд по месту вашего жительства; госпошлину потребитель не платит при цене иска до 1 млн ₽." },
   };
