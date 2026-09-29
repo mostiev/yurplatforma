@@ -142,3 +142,6 @@ footer.site { border-top: 1px solid var(--line); padding-block: 20px 32px; color
 .calc-table td:last-child, .calc-table th:last-child { text-align: right; white-space: nowrap; }
 .calc-notes { margin: 16px 0 4px; padding-left: 18px; display: grid; gap: 6px; font-size: 14px; color: #333; }
 .calc-empty { margin: 0; color: var(--muted); }
+.calc-h { margin: 18px 0 0; padding-top: 14px; border-top: 2px solid var(--line); font-size: 17px; }
+.wiz .step-title + .calc-h { margin-top: 4px; padding-top: 0; border-top: 0; }
+.calc-h + .field { border-top: 0; }

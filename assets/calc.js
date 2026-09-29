@@ -1,6 +1,6 @@
 /*
  * Калькуляторы: поля слева, результат справа, пересчёт на лету. Спецификация — content/kN.js (window.CALCS[id]):
- * { id, code, title, lead, fields: [...как вопросы анкеты: money, number, date, choice, select, textarea; show(a)],
+ * { id, code, title, lead, fields: [...как вопросы анкеты: money, number, date, choice, select, textarea, heading (подзаголовок); show(a)],
  *   compute(a) → { error?, summary: [{ label, value, big? }], table?: { head: [], rows: [[]] }, notes: [], related: [{ id, text }] } }
  * Ничего не отправляется на сервер.
  */
@@ -28,6 +28,7 @@
     root.append(h("div", { class: "doc-layout" }, $form, $res));
 
     function field(q) {
+      if (q.type === "heading") return h("h3", { class: "calc-h" }, q.label);
       const id = "c-" + q.id, v = a[q.id];
       let control;
       if (q.type === "choice") {
