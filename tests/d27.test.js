@@ -1,6 +1,9 @@
 // node tests/d27.test.js
 const assert = require("assert");
-const { U, run, allErrors, t, done, writeDocx } = require("./_load")("d27");
+const { U, C, run, allErrors, t, done, writeDocx } = require("./_load")("d27");
+// рабочий день не позже, чем n дней назад: срок в выходной сдвигается назад (ч. 8 ст. 136 ТК), тест от этого не зависит
+const wdAgo = n => C.prevWorkday(U.addDays(U.today(), -n));
+const ru = d => U.iso(d).split("-").reverse().join(".");
 const base = {
   debts: "15.07.2026; 100000; зарплата за июнь", paid: "yes", paid_date: "2026-07-31", dismissed: "working",
   org_name: "ООО «Ромашка»", org_address: "г. Москва, ул. Мира, д. 1", position: "менеджер", refund_method: "card",
@@ -16,14 +19,19 @@ t("выплачено с опозданием: компенсация 1 511,67 �
 });
 
 t("несколько долгов по строкам; не выплачено — считаем по сегодня, требуем долг и компенсацию", () => {
-  const due1 = U.iso(U.addDays(U.today(), -40)).split("-").reverse().join(".");
-  const due2 = U.iso(U.addDays(U.today(), -10)).split("-").reverse().join(".");
-  const r = run(base, { paid: "no", debts: `${due1}; 45000; зарплата\n${due2}; 30 000; аванс` });
-  assert.equal(r.d.rows.length, 2); assert.equal(r.d.principal, 75000); assert.equal(r.d.maxDelay, 40);
-  const manual = 45000 * 14 / 100 / 150 * 40 + 30000 * 14 / 100 / 150 * 10;
+  const d1 = wdAgo(40), d2 = wdAgo(10), n1 = U.daysBetween(d1, U.today()), n2 = U.daysBetween(d2, U.today());
+  const r = run(base, { paid: "no", debts: `${ru(d1)}; 45000; зарплата\n${ru(d2)}; 30 000; аванс` });
+  assert.equal(r.d.rows.length, 2); assert.equal(r.d.principal, 75000); assert.equal(r.d.maxDelay, n1);
+  const manual = 45000 * 14 / 100 / 150 * n1 + 30000 * 14 / 100 / 150 * n2;
   assert.equal(r.d.comp, Math.round(manual * 100) / 100);
   assert(r.text.includes("Выплатить задолженность в размере 75 000") && r.text.includes("по день фактического расчёта"));
   writeDocx("d27.docx", r.a, r.d);
+});
+
+t("срок в субботу 15.08.2026 — платить накануне, 14.08: задержка с 15.08", () => {
+  const r = run(base, { debts: "15.08.2026; 45000; зарплата", paid_date: "2026-09-10" });
+  assert.equal(r.d.maxDelay, 27); assert.equal(r.d.comp, 1134);
+  assert(r.text.includes("накануне, 14.08.2026, ч. 8 ст. 136"));
 });
 
 t("неверная строка — понятная ошибка", () => {

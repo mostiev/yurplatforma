@@ -1,9 +1,10 @@
-// Создаёт страницу документа: node tools/make-page.js d02 "Заголовок для поисковиков" "Описание для поисковиков"
+// Создаёт страницу документа или калькулятора (id вида k1): node tools/make-page.js d02 "Заголовок для поисковиков" "Описание для поисковиков"
 const fs = require("fs");
 const path = require("path");
 const [id, title, description] = process.argv.slice(2);
 if (!id || !title || !description) { console.error('Использование: node tools/make-page.js d02 "Title" "Description"'); process.exit(1); }
 const esc = s => s.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+const calc = /^k\d+$/.test(id);
 const html = `<!doctype html>
 <html lang="ru">
 <head>
@@ -15,7 +16,7 @@ const html = `<!doctype html>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="../assets/site.css">
 </head>
-<body data-doc="${id}">
+<body data-${calc ? "calc" : "doc"}="${id}">
 <div class="wrap">
   <header class="top">
     <a class="logo" href="../index.html">юр<span>платформа</span></a>
@@ -23,14 +24,13 @@ const html = `<!doctype html>
   </header>
   <div class="doc-head" id="head"></div>
   <div id="app"></div>
-  <footer class="site">Документ собирается в вашем браузере. Мы не получаем и не храним ваши ответы.</footer>
+  <footer class="site">${calc ? "Расчёт выполняется в вашем браузере" : "Документ собирается в вашем браузере"}. Мы не получаем и не храним ваши ответы.</footer>
 </div>
-<script src="../assets/docx.js"></script>
-<script src="../assets/engine.js"></script>
+${calc ? "" : '<script src="../assets/docx.js"></script>\n'}<script src="../assets/engine.js"></script>
 <script src="../assets/keyrate.js"></script>
 <script src="../assets/calendar.js"></script>
 <script src="../assets/common.js"></script>
-<script src="../content/${id}.js"></script>
+${calc ? '<script src="../assets/calc.js"></script>\n' : ""}<script src="../content/${id}.js"></script>
 <script src="../assets/page.js"></script>
 </body>
 </html>

@@ -102,15 +102,19 @@
     // проценты по ст. 395 ГК: долг × ключевая ставка / число дней в году (365 или 366) за каждый день просрочки.
     // Первый день — from, последний — to включительно (день уплаты входит). payments: [{date, amount}] уменьшают долг
     // после дня платежа. Возвращает {total, days, parts:[{from,to,days,rate,base,yearDays,sum}], rest}
-    comp395(amount, from, to, payments) {
+    // opts.zero: [[isoFrom, isoTo], …] — дни, за которые проценты не начисляются (мораторий), в расчёте показываются со ставкой 0
+    comp395(amount, from, to, payments, opts) {
       if (!(amount > 0) || !from || !to || to < from) return { total: 0, days: 0, parts: [], rest: amount > 0 ? amount : 0 };
+      const zero = (opts && opts.zero) || [];
       const pays = (payments || []).filter(p => p.date && p.amount > 0).sort((x, y) => x.date - y.date);
       let base = amount;
       pays.filter(p => p.date < from).forEach(p => base -= p.amount);
       const parts = [];
       let d = from, total = 0, days = 0;
       while (d <= to && base > 0) {
-        const rate = C.keyRate(d);
+        const iso = U.iso(d);
+        const off = zero.some(([x, y]) => iso >= x && iso <= y);
+        const rate = off ? 0 : C.keyRate(d);
         if (rate == null) return { total: null, days: 0, parts: [], rest: base, error: "нет ставки на " + U.fmtDate(d) };
         const y = d.getFullYear(), yearDays = (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0 ? 366 : 365;
         const add = base * rate / 100 / yearDays;
@@ -125,6 +129,40 @@
       parts.forEach(p => p.sum = Math.round(p.sum * 100) / 100);
       return { total: Math.round(total * 100) / 100, days, parts, rest: Math.max(0, Math.round(base * 100) / 100) };
     },
+
+    // мораторий на банкротство (ПП № 497 от 28.03.2022): 01.04.2022–01.10.2022 проценты и неустойки по денежным
+    // обязательствам, возникшим до 01.04.2022, не начисляются (п. 7 ППВС от 24.12.2020 № 44), кроме должников-исключений
+    MORATORIUM_2022: ["2022-04-01", "2022-10-01"],
+
+    // неустойка застройщика по ч. 2 ст. 6 214-ФЗ: цена × ставка на последний день срока (ВС 127-КГ23-18-К4) / 300
+    // за каждый день; гражданину — вдвое. Моратории: ПП № 423 (03.04.2020–31.12.2020), ПП № 479 (29.03.2022–30.06.2023),
+    // ПП № 326 с продлениями (22.03.2024–31.12.2025); с 01.07.2023 по 31.12.2025 — ставка не выше 7,5% (п. 2 ПП № 326).
+    // Первый день — следующий за сроком, последний — end включительно (день передачи по акту)
+    DDU_ZERO: [["2020-04-03", "2020-12-31"], ["2022-03-29", "2023-06-30"], ["2024-03-22", "2025-12-31"]],
+    dduPenalty(price, due, end, citizen) {
+      if (!(price > 0) || !due || !end || end <= due) return null;
+      const base = C.keyRate(due);
+      if (base == null) return { error: true };
+      const k = citizen === false ? 1 : 2;
+      const parts = [];
+      let d = U.addDays(due, 1), total = 0, days = 0, paidDays = 0;
+      while (d <= end) {
+        const iso = U.iso(d);
+        const zero = C.DDU_ZERO.some(([x, y]) => iso >= x && iso <= y);
+        const rate = zero ? 0 : (iso >= "2023-07-01" && iso <= "2025-12-31" ? Math.min(base, 7.5) : base);
+        const add = price * rate / 100 / 300 * k;
+        const last = parts[parts.length - 1];
+        if (last && last.rate === rate) { last.to = d; last.days++; last.sum += add; }
+        else parts.push({ from: d, to: d, days: 1, rate, sum: add });
+        total += add; days++; if (!zero) paidDays++;
+        d = U.addDays(d, 1);
+      }
+      parts.forEach(p => p.sum = Math.round(p.sum * 100) / 100);
+      return { base, k, parts, total: Math.round(total * 100) / 100, days, paidDays };
+    },
+
+    // ст. 136 ТК: если день выплаты зарплаты выпал на выходной или праздник — платят накануне
+    prevWorkday(dt) { let d = dt; while (d && !C.isWorkday(d)) d = U.addDays(d, -1); return d; },
 
     // 150000 → «150 000 (сто пятьдесят тысяч) рублей»; 1500,5 → «1 500 (одна тысяча пятьсот) рублей 50 копеек»
     rubles(n) {

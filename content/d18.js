@@ -14,35 +14,11 @@
   const C = global.Common;
   const F = U.F;
 
-  const ZERO = [["2020-04-03", "2020-12-31"], ["2022-03-29", "2023-06-30"], ["2024-03-22", "2025-12-31"]];
-  const CAP_FROM = "2023-07-01", CAP_TO = "2025-12-31", CAP = 7.5;
-
-  function calc(price, due, end) {
-    if (!(price > 0) || !due || !end || end <= due) return null;
-    const base = C.keyRate(due);
-    if (base == null) return { error: true };
-    const parts = [];
-    let d = U.addDays(due, 1), total = 0, days = 0, paidDays = 0;
-    while (d <= end) {
-      const iso = U.iso(d);
-      const zero = ZERO.some(([a, b]) => iso >= a && iso <= b);
-      const rate = zero ? 0 : (iso >= CAP_FROM && iso <= CAP_TO ? Math.min(base, CAP) : base);
-      const add = price * rate / 100 / 300 * 2;
-      const last = parts[parts.length - 1];
-      if (last && last.rate === rate) { last.to = d; last.days++; last.sum += add; }
-      else parts.push({ from: d, to: d, days: 1, rate, sum: add });
-      total += add; days++; if (!zero) paidDays++;
-      d = U.addDays(d, 1);
-    }
-    parts.forEach(p => p.sum = Math.round(p.sum * 100) / 100);
-    return { base, parts, total: Math.round(total * 100) / 100, days, paidDays };
-  }
-
   function derive(a) {
     const due = U.date(a.due_date);
     const end = a.handed === "yes" ? U.date(a.handed_date) : U.today();
     const price = typeof a.price === "number" ? a.price : null;
-    return { due, end, price, calc: calc(price, due, end) };
+    return { due, end, price, calc: C.dduPenalty(price, due, end) };
   }
 
   const pct = x => String(x).replace(".", ",");

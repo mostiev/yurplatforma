@@ -3,7 +3,7 @@
  * Основа: ст. 136 ТК (сроки выплаты), ст. 140 (расчёт при увольнении), ст. 142 (приостановка работы при задержке
  * более 15 дней с письменным извещением), ст. 236 (компенсация не ниже 1/150 ключевой ставки ЦБ, действующей в это
  * время, за каждый день со следующего дня после срока по день фактического расчёта включительно).
- * Ставка — assets/keyrate.js. Статус: ЧЕРНОВИК, не проверен юристом.
+ * Ч. 8 ст. 136 — срок в выходной сдвигается на предшествующий рабочий день (C.prevWorkday). Ставка — assets/keyrate.js. Статус: ЧЕРНОВИК, не проверен юристом.
  */
 (function (global) {
   "use strict";
@@ -26,7 +26,8 @@
     const debts = parseDebts(a.debts);
     const ok = debts.length > 0 && debts.every(x => x.due && x.amount);
     const calcDay = a.paid === "yes" ? U.date(a.paid_date) : U.today();
-    const rows = ok ? debts.map(x => Object.assign({}, x, C.comp236(x.amount, x.due, calcDay))) : [];
+    // ч. 8 ст. 136 ТК: день выплаты, выпавший на выходной или праздник, сдвигается на предшествующий рабочий день
+    const rows = ok ? debts.map(x => { const dueFixed = C.prevWorkday(x.due); return Object.assign({}, x, { dueFixed }, C.comp236(x.amount, dueFixed, calcDay)); }) : [];
     const principal = rows.reduce((s, r) => s + r.amount, 0);
     const comp = Math.round(rows.reduce((s, r) => s + (r.total || 0), 0) * 100) / 100;
     const maxDelay = rows.reduce((m, r) => Math.max(m, r.days), 0);
@@ -86,7 +87,7 @@
       C.header({ name: a.org_name, nameLabel: "работодатель", inn: a.org_inn, address: a.org_address }, C.from(a), P);
       C.title(P, "ПРЕТЕНЗИЯ", "о выплате задолженности по заработной плате и денежной компенсации");
       P.push({ text: `Я ${a.dismissed === "dismissed" ? "работал(а)" : "работаю"} у вас в должности ${F(a.position, "должность")}. Работодатель не выплатил в установленный срок причитающиеся мне суммы (ст. 136${a.dismissed === "dismissed" ? ", 140" : ""} Трудового кодекса РФ):`, indent: true });
-      if (d.ok) d.rows.forEach((r, i) => P.push({ text: `${i + 1}) ${r.what || "выплата"} — ${U.money(r.amount)} руб., срок выплаты ${U.fmtDate(r.due)};`, align: "left", leftIndent: 709, after: 40 }));
+      if (d.ok) d.rows.forEach((r, i) => P.push({ text: `${i + 1}) ${r.what || "выплата"} — ${U.money(r.amount)} руб., срок выплаты ${U.fmtDate(r.due)}${U.iso(r.due) !== U.iso(r.dueFixed) ? ` (выходной день — выплата должна была быть произведена накануне, ${U.fmtDate(r.dueFixed)}, ч. 8 ст. 136 ТК РФ)` : ""};`, align: "left", leftIndent: 709, after: 40 }));
       else P.push({ text: F(null, "список задержанных выплат"), indent: true });
       if (a.paid === "yes") P.push({ text: `Задолженность в размере ${U.money(d.principal)} руб. выплачена с опозданием ${F(U.fmtDate(d.calcDay), "дата")}.`, indent: true, before: 120 });
       else P.push({ text: `Общая сумма задолженности — ${F(d.ok ? U.money(d.principal) : null, "сумма")} руб.`, indent: true, before: 120 });

@@ -57,10 +57,10 @@ window.CATALOG = {
     {"id": "d53", "code": "Д-53", "title": "Жалоба в Роспотребнадзор", "section": "gov", "kind": "doc", "live": true},
     {"id": "d54", "code": "Д-54", "title": "Отзыв согласия на обработку персональных данных", "section": "gov", "kind": "doc", "live": true},
     {"id": "d55", "code": "Д-55", "title": "Запрос и оспаривание кредитной истории", "section": "gov", "kind": "doc", "live": true},
-    {"id": "k1", "code": "К-1", "title": "Неустойка по закону о защите прав потребителей", "section": "calc", "kind": "calc", "live": false},
-    {"id": "k2", "code": "К-2", "title": "Неустойка застройщика", "section": "calc", "kind": "calc", "live": false},
-    {"id": "k3", "code": "К-3", "title": "Проценты за пользование чужими деньгами", "section": "calc", "kind": "calc", "live": false},
-    {"id": "k4", "code": "К-4", "title": "Компенсация за задержку зарплаты", "section": "calc", "kind": "calc", "live": false},
-    {"id": "k5", "code": "К-5", "title": "Сколько останется при аресте счёта", "section": "calc", "kind": "calc", "live": false}
+    {"id": "k1", "code": "К-1", "title": "Неустойка по закону о защите прав потребителей", "section": "calc", "kind": "calc", "live": true},
+    {"id": "k2", "code": "К-2", "title": "Неустойка застройщика", "section": "calc", "kind": "calc", "live": true},
+    {"id": "k3", "code": "К-3", "title": "Проценты за пользование чужими деньгами", "section": "calc", "kind": "calc", "live": true},
+    {"id": "k4", "code": "К-4", "title": "Компенсация за задержку зарплаты", "section": "calc", "kind": "calc", "live": true},
+    {"id": "k5", "code": "К-5", "title": "Сколько останется при аресте счёта", "section": "calc", "kind": "calc", "live": true}
   ]
 };

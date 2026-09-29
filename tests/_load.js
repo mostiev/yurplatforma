@@ -9,7 +9,7 @@ module.exports = function load(id) {
   for (const f of ["assets/docx.js", "assets/engine.js", "assets/keyrate.js", "assets/calendar.js", "assets/common.js", `content/${id}.js`]) {
     vm.runInContext(fs.readFileSync(path.join(__dirname, "..", f), "utf8"), ctx, { filename: f });
   }
-  const { Engine, DOCS, Docx } = ctx;
+  const { Engine, DOCS, Docx, Common } = ctx;
   const spec = DOCS[id];
   const run = (base, over) => {
     const a = Object.assign({}, base, over);
@@ -27,5 +27,5 @@ module.exports = function load(id) {
     fs.mkdirSync(path.join(__dirname, "out"), { recursive: true });
     fs.writeFileSync(path.join(__dirname, "out", name), Docx.buildDocx(spec.render(a, d)));
   };
-  return { Engine, spec, U: Engine.U, run, allErrors, t, done, writeDocx };
+  return { Engine, spec, U: Engine.U, C: Common, run, allErrors, t, done, writeDocx };
 };
