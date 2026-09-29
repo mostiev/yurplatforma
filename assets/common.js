@@ -219,6 +219,28 @@
     // Дефлятор на 2026 год — приказ Минэкономразвития от 06.11.2025 № 734 (2025 год — 2,594). При смене года обновить
     PATENT: { year: 2026, base: 1200, deflator: 2.842, law: "приказ Минэкономразвития России от 06.11.2025 № 734" },
 
+    // нерабочие праздничные дни по ч. 1 ст. 112 ТК (без выходных и переносов) — для отпусков (ст. 120) и сроков в календарных днях
+    HOLIDAYS112: ["01-01", "01-02", "01-03", "01-04", "01-05", "01-06", "01-07", "01-08", "02-23", "03-08", "05-01", "05-09", "06-12", "11-04"],
+    isHoliday112(dt) { return !!dt && C.HOLIDAYS112.includes(U.iso(dt).slice(5)); },
+
+    // 1 минуту / 2 минуты / 5 минут
+    plural(x, one, few, many) { const a = Math.abs(x) % 100, b = a % 10; return a >= 11 && a <= 14 ? many : b === 1 ? one : b >= 2 && b <= 4 ? few : many; },
+
+    // работник и работодатель: общие вопросы и шапка для заявлений на работе (Д-56, Д-57)
+    jobQuestions() {
+      return [
+        { id: "org_name", type: "text", label: "Работодатель", placeholder: "ООО «Ромашка»" },
+        { id: "head_position", type: "text", label: "Должность руководителя", placeholder: "Генеральный директор" },
+        { id: "head_name", type: "text", label: "ФИО руководителя", placeholder: "Иванов Иван Иванович" },
+        { id: "buyer_name", type: "text", label: "Ваши фамилия, имя и отчество", autocomplete: "name" },
+        { id: "position", type: "text", label: "Ваша должность", placeholder: "Менеджер по продажам" },
+        { id: "department", type: "text", label: "Отдел", required: false },
+      ];
+    },
+    jobHeader(P, a) {
+      P.push({ text: `Кому: ${F(a.head_position, "должность руководителя")} ${F(a.org_name, "работодатель")}\n${F(a.head_name, "ФИО руководителя")}\nОт: ${F(a.buyer_name, "ваши ФИО")}\nДолжность: ${F(a.position, "должность")}${a.department ? ", " + a.department : ""}`, align: "left", leftIndent: 4500, after: 360 });
+    },
+
     // исполнительное производство: общие вопросы
     ipQuestions(opts) {
       const o = opts || {};
