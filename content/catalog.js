@@ -38,7 +38,7 @@ window.CATALOG = {
     {"id": "d34", "code": "Д-34", "title": "Договор займа между физлицами", "section": "debts", "kind": "doc", "live": true},
     {"id": "d35", "code": "Д-35", "title": "Претензия о возврате долга", "section": "debts", "kind": "doc", "live": true},
     {"id": "d36", "code": "Д-36", "title": "Возражения на судебный приказ", "section": "debts", "kind": "doc", "live": true},
-    {"id": "d37", "code": "Д-37", "title": "Внесудебное банкротство через МФЦ", "section": "debts", "kind": "doc", "live": false},
+    {"id": "d37", "code": "Д-37", "title": "Внесудебное банкротство через МФЦ", "section": "debts", "kind": "doc", "live": true},
     {"id": "d38", "code": "Д-38", "title": "Заявление приставу о сохранении прожиточного минимума", "section": "bailiffs", "kind": "doc", "live": true},
     {"id": "d39", "code": "Д-39", "title": "Заявление в банк о сохранении прожиточного минимума", "section": "bailiffs", "kind": "doc", "live": true},
     {"id": "d40", "code": "Д-40", "title": "Снятие ареста с защищённых выплат", "section": "bailiffs", "kind": "doc", "live": true},

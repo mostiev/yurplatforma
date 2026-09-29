@@ -109,7 +109,7 @@
 
   // ---------- Текст ----------
   function paragraphsToText(ps) {
-    return ps.map(p => p.text).join("\n\n");
+    return ps.map(p => p.pageBreak ? "————" : p.table ? p.table.rows.map(r => r.map(c => c && typeof c === "object" ? c.text : c).join(" | ")).join("\n") : p.text).join("\n\n");
   }
 
   // ---------- Интерфейс ----------
@@ -303,14 +303,26 @@
       const ps = spec.render(state.a, d);
       $preview.textContent = "";
       const paper = h("div", { class: "paper" });
+      const withGaps = (el, text) => String(text).split(/(⟨[^⟩]*⟩)/).forEach(part => {
+        if (!part) return;
+        if (part.startsWith("⟨")) el.append(h("span", { class: "gap" }, part.slice(1, -1)));
+        else part.split("\n").forEach((line, i) => { if (i) el.append(h("br")); el.append(line); });
+      });
       for (const p of ps) {
+        if (p.pageBreak) { paper.append(h("hr", { class: "pbreak" })); continue; }
+        if (p.table) {
+          const head = p.table.head || 0;
+          paper.append(h("div", { class: "pt-wrap" }, h("table", { class: "pt" }, p.table.rows.map((row, ri) => h("tr", {}, row.map(c => {
+            const cell = c && typeof c === "object" ? c : { text: c };
+            const el = h(ri < head ? "th" : "td", { colspan: cell.span > 1 ? String(cell.span) : null, class: cell.bold ? "b" : null });
+            withGaps(el, cell.text == null ? "" : cell.text);
+            return el;
+          }))))));
+          continue;
+        }
         const el = h("p", { class: `pp a-${p.align || "both"}${p.bold ? " b" : ""}${p.indent ? " ind" : ""}${p.leftIndent ? " shifted" : ""}` });
         // заглушки ⟨…⟩ подсвечиваем
-        String(p.text).split(/(⟨[^⟩]*⟩)/).forEach(part => {
-          if (!part) return;
-          if (part.startsWith("⟨")) el.append(h("span", { class: "gap" }, part.slice(1, -1)));
-          else part.split("\n").forEach((line, i) => { if (i) el.append(h("br")); el.append(line); });
-        });
+        withGaps(el, p.text);
         paper.append(el);
       }
       $preview.append(h("div", { class: "preview-h" }, "Предпросмотр"), paper);

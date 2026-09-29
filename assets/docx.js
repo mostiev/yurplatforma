@@ -96,7 +96,8 @@
       .replace(/"/g, "&quot;");
   }
 
-  // Абзац: { text, align: 'left'|'right'|'center'|'both', bold, indent (первая строка), before, after, keepNext }
+  // Абзац: { text, align: 'left'|'right'|'center'|'both', bold, size (полупункты), indent (первая строка), before, after, keepNext }.
+  // Кроме абзацев: { pageBreak: true } — новая страница, { table: … } — таблица (tableXml)
   // text может содержать \n — это разрыв строки внутри абзаца.
   function paragraphXml(p) {
     const jc = { left: "left", right: "right", center: "center", both: "both" }[p.align || "both"];
@@ -110,8 +111,38 @@
     return `<w:p><w:pPr>${p.keepNext ? "<w:keepNext/>" : ""}${spacing}${ind}<w:jc w:val="${jc}"/></w:pPr>${runs}</w:p>`;
   }
 
+  // Таблица: { table: { widths: [twips…], rows: [[ячейка…]…], head: число строк-заголовков, size } }.
+  // Ячейка — строка или { text, span (объединить столбцы), bold, align }. Ширина текста страницы — 9355 twips.
+  function tableXml(t) {
+    const size = t.size || 20;
+    const border = ["top", "left", "bottom", "right", "insideH", "insideV"].map(b => `<w:${b} w:val="single" w:sz="4" w:space="0" w:color="000000"/>`).join("");
+    const grid = t.widths.map(w => `<w:gridCol w:w="${w}"/>`).join("");
+    const rows = t.rows.map((row, ri) => {
+      let col = 0;
+      const cells = row.map(c => {
+        const cell = typeof c === "object" && c !== null ? c : { text: c };
+        const span = cell.span || 1;
+        const w = t.widths.slice(col, col + span).reduce((x, y) => x + y, 0);
+        col += span;
+        const bold = cell.bold || ri < (t.head || 0);
+        const p = paragraphXml({ text: cell.text == null ? "" : String(cell.text), align: cell.align || (ri < (t.head || 0) ? "center" : "left"), bold, size, after: 0 });
+        return `<w:tc><w:tcPr><w:tcW w:w="${w}" w:type="dxa"/>${span > 1 ? `<w:gridSpan w:val="${span}"/>` : ""}</w:tcPr>${p}</w:tc>`;
+      }).join("");
+      return `<w:tr>${ri < (t.head || 0) ? "<w:trPr><w:tblHeader/></w:trPr>" : "<w:trPr><w:cantSplit/></w:trPr>"}${cells}</w:tr>`;
+    }).join("");
+    return `<w:tbl><w:tblPr><w:tblW w:w="${t.widths.reduce((x, y) => x + y, 0)}" w:type="dxa"/><w:tblBorders>${border}</w:tblBorders><w:tblLayout w:type="fixed"/>` +
+      `<w:tblCellMar><w:left w:w="57" w:type="dxa"/><w:right w:w="57" w:type="dxa"/></w:tblCellMar></w:tblPr><w:tblGrid>${grid}</w:tblGrid>${rows}</w:tbl>` +
+      `<w:p><w:pPr><w:spacing w:before="0" w:after="120"/></w:pPr></w:p>`;
+  }
+
+  function blockXml(p) {
+    if (p.pageBreak) return `<w:p><w:r><w:br w:type="page"/></w:r></w:p>`;
+    if (p.table) return tableXml(p.table);
+    return paragraphXml(p);
+  }
+
   function buildDocx(paragraphs) {
-    const body = paragraphs.map(paragraphXml).join("");
+    const body = paragraphs.map(blockXml).join("");
     const documentXml =
       `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>` +
       `<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">` +
