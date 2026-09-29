@@ -96,7 +96,7 @@
       .replace(/"/g, "&quot;");
   }
 
-  // Абзац: { text, align: 'left'|'right'|'center'|'both', bold, size (полупункты), indent (первая строка), before, after, keepNext }.
+  // Абзац: { text, align: 'left'|'right'|'center'|'both', bold, size (полупункты), indent (первая строка), before, after, keepNext, keepLines (не разрывать абзац между страницами) }.
   // Кроме абзацев: { pageBreak: true } — новая страница, { table: … } — таблица (tableXml)
   // text может содержать \n — это разрыв строки внутри абзаца.
   function paragraphXml(p) {
@@ -108,7 +108,7 @@
     const runs = lines
       .map((line, i) => `<w:r>${rPr}${i ? "<w:br/>" : ""}<w:t xml:space="preserve">${esc(line)}</w:t></w:r>`)
       .join("");
-    return `<w:p><w:pPr>${p.keepNext ? "<w:keepNext/>" : ""}${spacing}${ind}<w:jc w:val="${jc}"/></w:pPr>${runs}</w:p>`;
+    return `<w:p><w:pPr>${p.keepNext ? "<w:keepNext/>" : ""}${p.keepLines ? "<w:keepLines/>" : ""}${spacing}${ind}<w:jc w:val="${jc}"/></w:pPr>${runs}</w:p>`;
   }
 
   // Таблица: { table: { widths: [twips…], rows: [[ячейка…]…], head: число строк-заголовков, size } }.
