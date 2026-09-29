@@ -1,10 +1,14 @@
-// Создаёт страницу документа или калькулятора (id вида k1): node tools/make-page.js d02 "Заголовок для поисковиков" "Описание для поисковиков"
+// Создаёт страницу документа или калькулятора (id вида k1); вариант документа — с --base=dNN: node tools/make-page.js d02 "Заголовок для поисковиков" "Описание для поисковиков"
 const fs = require("fs");
 const path = require("path");
-const [id, title, description] = process.argv.slice(2);
+const args = process.argv.slice(2).filter(x => !x.startsWith("--"));
+const [id, title, description] = args;
+// --base=d12: вариант документа поверх другого (content/m03.js дополняет content/d12.js)
+const base = (process.argv.find(x => x.startsWith("--base=")) || "").slice(7);
 if (!id || !title || !description) { console.error('Использование: node tools/make-page.js d02 "Title" "Description"'); process.exit(1); }
 const esc = s => s.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
-const calc = /^k\d+$/.test(id);
+// калькулятор — если файл регистрирует себя в window.CALCS (k1…k5, m05)
+const calc = /global\.CALCS\.\w+\s*=/.test(fs.readFileSync(path.join(__dirname, "..", "content", id + ".js"), "utf8"));
 // версия файлов: меняется при обновлении, чтобы браузер не брал старые скрипты из кэша (node tools/bump.js)
 const V = fs.readFileSync(path.join(__dirname, "version.txt"), "utf8").trim();
 const html = `<!doctype html>
@@ -32,7 +36,7 @@ ${calc ? "" : `<script src="../assets/docx.js?v=${V}"></script>\n`}<script src="
 <script src="../assets/keyrate.js?v=${V}"></script>
 <script src="../assets/calendar.js?v=${V}"></script>
 <script src="../assets/common.js?v=${V}"></script>
-${calc ? `<script src="../assets/calc.js?v=${V}"></script>\n` : ""}<script src="../content/${id}.js?v=${V}"></script>
+${calc ? `<script src="../assets/calc.js?v=${V}"></script>\n` : ""}${base ? `<script src="../content/${base}.js?v=${V}"></script>\n` : ""}<script src="../content/${id}.js?v=${V}"></script>
 <script src="../assets/page.js?v=${V}"></script>
 </body>
 </html>

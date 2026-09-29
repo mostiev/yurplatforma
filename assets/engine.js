@@ -133,7 +133,8 @@
   }
 
   function mount(root, spec) {
-    const state = { a: {}, step: 0, touched: {}, done: false };
+    // spec.defaults — ответы, заданные заранее (например, вариант документа для отдельной страницы каталога)
+    const state = { a: Object.assign({}, spec.defaults || {}), step: 0, touched: {}, done: false };
 
     const $form = h("section", { class: "wiz" });
     const $preview = h("section", { class: "preview", "aria-label": "Предпросмотр документа" });
