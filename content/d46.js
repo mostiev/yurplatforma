@@ -131,6 +131,8 @@
       return g;
     },
 
+    reminders(a, d) { return d.late ? [] : [{ date: d.lastDay, title: "Последний день для отказа от страховки", text: `Период охлаждения — ${d.limit} дней.` }]; },
+
     fileName(a) { return "Отказ от страховки" + (a.buyer_name ? " — " + U.shortName(a.buyer_name) : ""); },
   };
 

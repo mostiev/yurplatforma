@@ -150,6 +150,8 @@
       return g;
     },
 
+    reminders(a, d) { return d.tooLate || d.late ? [] : [{ date: d.deadline, title: "Последний день для возражений на судебный приказ", text: "10 рабочих дней с получения копии приказа (ст. 128, 129 ГПК)." }]; },
+
     fileName(a) { return "Возражения на судебный приказ" + (a.case_no ? " по делу " + String(a.case_no).replace(/[\\/:*?"<>|]/g, "-") : ""); },
   };
 

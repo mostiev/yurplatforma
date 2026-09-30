@@ -104,8 +104,12 @@
       if (!death && !H.groups.length) return null;
       const notes = [];
       const summary = [];
+      const reminders = [];
       if (death) {
         const last = C.nextWorkday(U.addMonths(death, 6));
+        reminders.push({ date: U.addDays(last, -14), title: "Через 2 недели истекает срок принятия наследства", text: `Заявление должно попасть к нотариусу до ${U.fmtDate(last)}.` },
+          { date: last, title: "Последний день, чтобы принять наследство" },
+          { date: U.addDays(last, 1), title: "Можно получать свидетельство о праве на наследство" });
         const left = U.daysBetween(U.today(), last);
         summary.push({ label: "Принять наследство до", value: U.fmtDate(last) + " включительно", big: !H.groups.length });
         if (left < 0) {
@@ -115,7 +119,7 @@
       }
       if (!H.groups.length) {
         if (death) notes.push("Наследников первых трёх очередей нет. Наследовать могут дальние родственники (4–7 очереди, ст. 1145 ГК) или нетрудоспособные иждивенцы (ст. 1148). Если никого нет — имущество выморочное и переходит государству или муниципалитету (ст. 1151).");
-        return death ? { summary, notes, related: [{ id: "d61", text: "Заявление нотариусу" }] } : null;
+        return death ? { summary, notes, reminders, related: [{ id: "d61", text: "Заявление нотариусу" }] } : null;
       }
       const n = H.groups.length;
       const value = typeof a.value === "number" && a.value > 0 ? a.value : null;
@@ -158,6 +162,7 @@
         summary,
         table: { head, rows },
         notes,
+        reminders,
         related: [{ id: "d61", text: "Заявление нотариусу" }],
       };
     },

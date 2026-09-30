@@ -121,7 +121,7 @@
       if (!ranges.length && mrot && pay / 12 < mrot) notes.push(`Средний месячный заработок получился ниже МРОТ (${U.money(mrot)} ₽). Если вы отработали всю норму времени, он не может быть ниже МРОТ (п. 18 Положения № 540) — тогда средний дневной не меньше ${rub(r2(mrot / 29.3))}.`);
       const rows = B.months.filter(m => m.excl).map(m => [m.first.toLocaleDateString("ru-RU", { month: "long", year: "numeric" }), `${m.dim - m.excl} из ${m.dim}`, num(r2(m.days))]);
 
-      let days, summary = [], related;
+      let days, summary = [], related, reminders = [];
       if (vac) {
         days = typeof a.days === "number" && a.days > 0 ? Math.floor(a.days) : null;
         if (!days) return null;
@@ -131,6 +131,7 @@
         if (extra) notes.push(`В отпуск попали праздники (${extra} ${C.plural(extra, "день", "дня", "дней")}) — они не входят в отпуск и не оплачиваются, отпуск продлевается (ст. 120 ТК).`);
         notes.push(`Отпускные должны выплатить не позднее ${U.fmtDate(U.addDays(event, -3))} — за 3 дня до начала (ч. 9 ст. 136 ТК). Если заплатили позже, можно потребовать перенести отпуск (ч. 2 ст. 124) и компенсацию за задержку (К-4).`);
         related = [{ id: "d57", text: "Заявление на отпуск" }, { id: "k4", text: "Компенсация за задержку" }];
+        reminders = [{ date: U.addDays(event, -3), title: "Отпускные должны прийти", text: "Не позднее чем за 3 дня до начала отпуска (ч. 9 ст. 136 ТК)." }, { date: event, title: "Начало отпуска" }, { date: C.nextWorkday(U.addDays(end, 1)), title: "Выход на работу после отпуска", text: "Первый рабочий день по производственному календарю (при пятидневке)." }];
       } else {
         if (a.know_days === "yes") {
           days = typeof a.left_days === "number" && a.left_days >= 0 ? a.left_days : null;
@@ -157,7 +158,7 @@
       summary.unshift({ label: vac ? "Дней отпуска" : "Дней компенсации", value: num(days) }, { label: "Средний дневной заработок", value: rub(daily) });
       summary.push({ label: vac ? "Отпускные до НДФЛ" : "Компенсация до НДФЛ", value: rub(gross) }, { label: "НДФЛ 13%", value: rub(tax) }, { label: "На руки", value: rub(gross - tax), big: true });
       notes.push("НДФЛ — 13%, если доход с начала года не больше 2,4 млн ₽; выше — 15% и больше (ст. 224 НК). Работодатель может посчитать по-другому, если в коллективном договоре предусмотрен более выгодный порядок.");
-      return { summary, table: rows.length ? { head: ["Месяц с исключёнными днями", "Отработано календарных дней", "Дней в расчёт"], rows } : null, notes, related };
+      return { summary, table: rows.length ? { head: ["Месяц с исключёнными днями", "Отработано календарных дней", "Дней в расчёт"], rows } : null, notes, related, reminders };
     },
   };
 

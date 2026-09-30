@@ -126,6 +126,8 @@
       return g;
     },
 
+    reminders(a, d) { return [!d.late && { date: d.deadline, title: "Последний день для жалобы на штраф", text: "10 дней с получения копии постановления (ст. 30.3 КоАП)." }, d.discountOpen && { date: d.discountTill, title: "Последний день оплаты штрафа со скидкой 25%", text: "ч. 1.3 ст. 32.2 КоАП." }].filter(Boolean); },
+
     fileName(a) { return "Жалоба на штраф" + (a.resolution ? " № " + String(a.resolution).slice(-6) : ""); },
   };
 

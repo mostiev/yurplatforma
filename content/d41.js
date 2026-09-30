@@ -131,6 +131,8 @@
       return g;
     },
 
+    reminders(a, d) { return d.late ? [] : [{ date: d.deadline, title: "Последний день для жалобы на пристава", text: "10 рабочих дней (ст. 122 закона № 229-ФЗ)." }]; },
+
     fileName(a) { return "Жалоба на судебного пристава" + (a.buyer_name ? " — " + U.shortName(a.buyer_name) : ""); },
   };
 

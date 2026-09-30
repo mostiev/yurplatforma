@@ -112,6 +112,8 @@
       return g;
     },
 
+    reminders(a, d) { return [{ date: d.deadline, title: "Последний день, чтобы сдать объяснительную", text: "2 рабочих дня с момента, когда её затребовали (ст. 193 ТК)." }]; },
+
     fileName(a) { return "Объяснительная" + (a.buyer_name ? " — " + U.shortName(a.buyer_name) : ""); },
   };
 

@@ -80,6 +80,7 @@
           h("tbody", {}, r.table.rows.map(row => h("tr", {}, row.map(x => h("td", {}, nb(x)))))))));
       }
       if (r.notes && r.notes.length) card.append(h("ul", { class: "calc-notes" }, r.notes.map(n => h("li", {}, n))));
+      if (r.reminders) { const rb = global.Engine.U.remindersBlock(h, r.reminders, "Сроки — " + spec.title); if (rb) card.append(rb); }
       const text = [spec.title, ...(r.summary || []).map(s => `${s.label}: ${s.value}`), ...(r.table ? [r.table.head.join(" | "), ...r.table.rows.map(x => x.join(" | "))] : [])].join("\n");
       const copy = h("button", { class: "btn ghost", type: "button", onclick: async () => {
         try { await navigator.clipboard.writeText(text); copy.textContent = "Скопировано"; } catch (_) { copy.textContent = "Не вышло — выделите текст"; }

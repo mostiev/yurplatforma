@@ -142,6 +142,8 @@
       return g;
     },
 
+    reminders(a, d) { return [d.start && a.kind !== "unpaid" && { date: U.addDays(d.start, -3), title: "Отпускные должны прийти", text: "Не позднее чем за 3 дня до начала отпуска (ч. 9 ст. 136 ТК)." }, d.start && { date: d.start, title: "Начало отпуска" }, d.end && a.kind !== "dismissal" && { date: C.nextWorkday(U.addDays(d.end, 1)), title: "Выход на работу после отпуска", text: "Первый рабочий день по производственному календарю (при пятидневке)." }].filter(Boolean); },
+
     fileName(a) { return "Заявление на отпуск" + (a.buyer_name ? " — " + U.shortName(a.buyer_name) : ""); },
   };
 

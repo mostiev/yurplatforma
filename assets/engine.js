@@ -10,7 +10,54 @@
   // ---------- Утилиты для спецификаций ----------
   const MONTHS = ["января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря"];
 
+  // календарь .ics: события на весь день с напоминанием накануне в 9:00. Файл создаётся в браузере
+  function icsText(events) {
+    const pad = n => String(n).padStart(2, "0");
+    const day = d => `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}`;
+    const esc = s => String(s || "").replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n");
+    // строки не длиннее 75 байт (RFC 5545), перенос — CRLF + пробел
+    const fold = line => {
+      const enc = new TextEncoder(); const out = []; let cur = "", len = 0;
+      for (const ch of line) { const b = enc.encode(ch).length; if (len + b > (out.length ? 74 : 75)) { out.push(cur); cur = ""; len = 0; } cur += ch; len += b; }
+      out.push(cur); return out.join("\r\n ");
+    };
+    const now = new Date();
+    const stamp = `${now.getUTCFullYear()}${pad(now.getUTCMonth() + 1)}${pad(now.getUTCDate())}T${pad(now.getUTCHours())}${pad(now.getUTCMinutes())}${pad(now.getUTCSeconds())}Z`;
+    const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//yurplatforma//RU", "CALSCALE:GREGORIAN", "METHOD:PUBLISH"];
+    events.forEach((e, i) => {
+      const next = new Date(e.date.getFullYear(), e.date.getMonth(), e.date.getDate() + 1);
+      lines.push("BEGIN:VEVENT", `UID:${day(e.date)}-${i}-${Math.random().toString(36).slice(2, 10)}@yurplatforma`, `DTSTAMP:${stamp}`,
+        `DTSTART;VALUE=DATE:${day(e.date)}`, `DTEND;VALUE=DATE:${day(next)}`, `SUMMARY:${esc(e.title)}`);
+      if (e.text) lines.push(`DESCRIPTION:${esc(e.text)}`);
+      lines.push("BEGIN:VALARM", "ACTION:DISPLAY", "TRIGGER:-PT15H", `DESCRIPTION:${esc(e.title)}`, "END:VALARM", "END:VEVENT");
+    });
+    lines.push("END:VCALENDAR");
+    return lines.map(fold).join("\r\n") + "\r\n";
+  }
+
   const U = {
+    icsText,
+    // только будущие события (сегодня включительно), по дате
+    upcoming(events) {
+      const t = U.today();
+      return (events || []).filter(e => e && e.date && e.date >= t).sort((x, y) => x.date - y.date);
+    },
+    saveFile(content, name, type) {
+      const url = URL.createObjectURL(new Blob([content], { type }));
+      const link = document.createElement("a"); link.href = url; link.download = String(name).replace(/[\\/:*?"<>|]+/g, " -").replace(/\s+/g, " ").trim();
+      document.body.append(link); link.click(); link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 4000);
+    },
+    // блок «Сроки» с кнопкой «Добавить в календарь»; h — функция создания элементов
+    remindersBlock(h, events, fileName) {
+      const ev = U.upcoming(events);
+      if (!ev.length) return null;
+      return h("div", { class: "reminders" },
+        h("h3", {}, "Сроки"),
+        h("ul", {}, ev.slice(0, ev.length > 4 ? 3 : 4).map(e => h("li", {}, h("strong", {}, U.fmtDate(e.date)), " — ", e.title)), ev.length > 4 ? h("li", {}, `и ещё ${ev.length - 3} — все попадут в календарь`) : null),
+        h("button", { class: "btn ghost", type: "button", onclick: () => U.saveFile(icsText(ev), (fileName || "Сроки") + ".ics", "text/calendar;charset=utf-8") }, "Добавить в календарь"),
+        h("p", { class: "field-h" }, "Скачается файл .ics — откройте его, и сроки появятся в календаре телефона или компьютера с напоминанием накануне."));
+    },
     // дата "YYYY-MM-DD" → Date (полночь по местному времени)
     date(s) {
       if (!s || !/^\d{4}-\d{2}-\d{2}$/.test(s)) return null;
@@ -293,6 +340,7 @@
           }, "Скачать .docx"),
           copyBtn,
           h("button", { class: "btn ghost", type: "button", onclick: () => { state.done = false; state.step = spec.steps.filter(s => !s.show || s.show(state.a, spec.derive(state.a))).length - 1; renderForm(true); } }, "Изменить ответы")),
+        spec.reminders ? U.remindersBlock(h, spec.reminders(a, d), "Сроки — " + (spec.fileName ? spec.fileName(a, d) : spec.title)) : null,
         guide.length ? h("div", { class: "guide" },
           h("h3", {}, "Что делать дальше"),
           h("ol", {}, guide.map(g => h("li", {}, h("strong", {}, g.title), " ", g.text)))) : null,

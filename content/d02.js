@@ -203,6 +203,8 @@
       return g;
     },
 
+    reminders(a, d) { return d.late ? [] : [{ date: d.deadline, title: d.store ? "Последний день для обмена или возврата товара" : "Последний день, чтобы отказаться от товара", text: "Передать заявление продавцу (Д-02)." }]; },
+
     fileName(a) { return "Заявление о возврате товара" + (a.buyer_name ? " — " + U.shortName(a.buyer_name) : ""); },
   };
 

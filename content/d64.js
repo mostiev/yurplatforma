@@ -130,6 +130,8 @@
       return g;
     },
 
+    reminders(a, d) { return [{ date: d.last, title: "Последний рабочий день: расчёт, трудовая книжка" + (d.pay && !d.payDate ? ", выходное пособие" : "") }, d.payDate && { date: d.payDate, title: "Срок выплаты выходного пособия по соглашению" }].filter(Boolean); },
+
     fileName(a) { return (a.route === "proposal" ? "Предложение об увольнении по соглашению" : "Соглашение о расторжении трудового договора") + (a.buyer_name ? " — " + U.shortName(a.buyer_name) : ""); },
   };
 

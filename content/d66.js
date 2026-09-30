@@ -214,6 +214,8 @@
       return g;
     },
 
+    reminders(a, d) { const from = (a.kind !== "credit" && d.told) || d.date; return from ? [{ date: U.addDays(from, 30), title: "Банк должен дать ответ на заявление о мошенничестве", text: "30 дней на рассмотрение (ст. 9 закона № 161-ФЗ). Если отказали или молчат — жалоба в ЦБ, финансовому уполномоченному или иск." }] : []; },
+
     fileName(a) { return "Заявления — мошенники" + (a.buyer_name ? " — " + U.shortName(a.buyer_name) : ""); },
   };
 

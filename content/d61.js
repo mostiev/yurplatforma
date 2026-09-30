@@ -186,6 +186,8 @@
       return g;
     },
 
+    reminders(a, d) { return d.late || !d.deadline ? [] : [{ date: U.addDays(d.deadline, -14), title: "Через 2 недели истекает срок принятия наследства", text: `Заявление должно попасть к нотариусу до ${U.fmtDate(d.deadline)}.` }, { date: d.deadline, title: "Последний день для заявления нотариусу о наследстве" }, a.kind === "accept" && { date: U.addDays(d.deadline, 1), title: "Можно получать свидетельство о праве на наследство", text: "После 6 месяцев со дня открытия наследства (ст. 1163 ГК)." }].filter(Boolean); },
+
     fileName(a) { return (a.kind === "accept" ? "Заявление о принятии наследства" : "Заявление об отказе от наследства") + (a.buyer_name ? " — " + U.shortName(a.buyer_name) : ""); },
   };
 
