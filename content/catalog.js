@@ -82,6 +82,7 @@ window.CATALOG = {
     {"id": "k11", "code": "К-11", "title": "Долг по алиментам и неустойка", "section": "family", "kind": "calc", "live": true},
     {"id": "d63", "code": "Д-63", "title": "Ущерб от ДТП: претензия или иск к виновнику", "section": "auto", "kind": "doc", "live": true},
     {"id": "d64", "code": "Д-64", "title": "Увольнение по соглашению сторон", "section": "work", "kind": "doc", "live": true},
-    {"id": "k12", "code": "К-12", "title": "Налог при продаже квартиры или машины", "section": "tax", "kind": "calc", "live": true}
+    {"id": "k12", "code": "К-12", "title": "Налог при продаже квартиры или машины", "section": "tax", "kind": "calc", "live": true},
+    {"id": "d65", "code": "Д-65", "title": "Вернуть долг по расписке: судебный приказ или иск", "section": "debts", "kind": "doc", "live": true}
   ]
 };
