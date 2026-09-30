@@ -71,11 +71,13 @@
         card.append(h("p", { class: "calc-empty" }, (r && r.error) || "Заполните поля слева — расчёт появится здесь."));
         $res.append(card); return;
       }
-      (r.summary || []).forEach(s => card.append(h("div", { class: "calc-row" + (s.big ? " big" : "") }, h("span", {}, s.label), h("strong", {}, s.value))));
+      // «₽» не отрывается от числа при переносе
+      const nb = x => String(x).replace(/ ₽/g, "\u00a0₽");
+      (r.summary || []).forEach(s => card.append(h("div", { class: "calc-row" + (s.big ? " big" : "") }, h("span", {}, s.label), h("strong", {}, nb(s.value)))));
       if (r.table && r.table.rows.length) {
         card.append(h("div", { class: "calc-table-wrap" }, h("table", { class: "calc-table" },
           h("thead", {}, h("tr", {}, r.table.head.map(x => h("th", {}, x)))),
-          h("tbody", {}, r.table.rows.map(row => h("tr", {}, row.map(x => h("td", {}, x))))))));
+          h("tbody", {}, r.table.rows.map(row => h("tr", {}, row.map(x => h("td", {}, nb(x)))))))));
       }
       if (r.notes && r.notes.length) card.append(h("ul", { class: "calc-notes" }, r.notes.map(n => h("li", {}, n))));
       const text = [spec.title, ...(r.summary || []).map(s => `${s.label}: ${s.value}`), ...(r.table ? [r.table.head.join(" | "), ...r.table.rows.map(x => x.join(" | "))] : [])].join("\n");
