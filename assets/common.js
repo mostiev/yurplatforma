@@ -219,6 +219,40 @@
     // Дефлятор на 2026 год — приказ Минэкономразвития от 06.11.2025 № 734 (2025 год — 2,594). При смене года обновить
     PATENT: { year: 2026, base: 1200, deflator: 2.842, law: "приказ Минэкономразвития России от 06.11.2025 № 734" },
 
+    // среднемесячная начисленная зарплата в целом по РФ (Росстат) — для долга по алиментам, если должник не работал
+    // (п. 4 ст. 113 СК, ч. 3 ст. 102 229-ФЗ). Обновлять по мере публикации Росстатом (примерно через 2 месяца).
+    AVGWAGE: { period: "июнь 2026", value: 114743, source: "Росстат (справка КонсультантПлюс «Среднемесячная заработная плата в целом по РФ»), опубл. 03.09.2026" },
+
+    // долг по алиментам и неустойка по месяцам (п. 2 ст. 115 СК; п. 64 Пленума ВС от 26.12.2017 № 56 — по каждому месячному
+    // платежу отдельно, дни просрочки — на день расчёта). Платёж за месяц считается просроченным со следующего дня после
+    // окончания месяца. Неполные месяцы — пропорционально дням. Оплаты гасят самые старые долги.
+    // o = { from: Date, to: Date, perMonth: число, paid: число, calc: Date }
+    alimonySchedule(o) {
+      const rows = [];
+      let d = new Date(o.from.getFullYear(), o.from.getMonth(), 1);
+      while (d <= o.to) {
+        const dim = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+        const mEnd = new Date(d.getFullYear(), d.getMonth(), dim);
+        const a = o.from > d ? o.from : d, b = o.to < mEnd ? o.to : mEnd;
+        const days = U.daysBetween(a, b) + 1;
+        const accrued = Math.round(o.perMonth * (days === dim ? 1 : days / dim) * 100) / 100;
+        rows.push({ month: new Date(d), mEnd, partDays: days === dim ? null : days, dim, accrued });
+        d = new Date(d.getFullYear(), d.getMonth() + 1, 1);
+      }
+      let left = Math.max(0, o.paid || 0);
+      let debt = 0, pen = 0;
+      rows.forEach(r => {
+        const pay = Math.min(left, r.accrued); left -= pay;
+        r.paid = Math.round(pay * 100) / 100;
+        r.unpaid = Math.round((r.accrued - pay) * 100) / 100;
+        r.late = o.calc > r.mEnd ? U.daysBetween(r.mEnd, o.calc) : 0;
+        r.penalty = Math.round(r.unpaid * 0.001 * r.late * 100) / 100;
+        debt += r.unpaid; pen += r.penalty;
+      });
+      const accrued = rows.reduce((s, r) => s + r.accrued, 0);
+      return { rows, accrued: Math.round(accrued * 100) / 100, debt: Math.round(debt * 100) / 100, penalty: Math.round(pen * 100) / 100, overpaid: Math.round(left * 100) / 100 };
+    },
+
     // нерабочие праздничные дни по ч. 1 ст. 112 ТК (без выходных и переносов) — для отпусков (ст. 120) и сроков в календарных днях
     HOLIDAYS112: ["01-01", "01-02", "01-03", "01-04", "01-05", "01-06", "01-07", "01-08", "02-23", "03-08", "05-01", "05-09", "06-12", "11-04"],
     isHoliday112(dt) { return !!dt && C.HOLIDAYS112.includes(U.iso(dt).slice(5)); },
