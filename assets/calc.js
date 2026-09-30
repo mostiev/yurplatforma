@@ -50,8 +50,8 @@
         control.value = v ?? "";
       }
       return h("div", { class: "field" },
-        h("label", { class: "field-l", for: q.type === "choice" ? null : id }, q.label, q.required === false ? h("span", { class: "opt" }, " — необязательно") : null),
-        q.hint ? h("p", { class: "field-h" }, q.hint) : null, q.suffix ? h("div", { class: "with-suffix" }, control, h("span", { class: "suffix" }, q.suffix)) : control);
+        h("label", { class: "field-l", for: q.type === "choice" ? null : id }, typeof q.label === "function" ? q.label(a) : q.label, q.required === false ? h("span", { class: "opt" }, " — необязательно") : null),
+        q.hint ? h("p", { class: "field-h" }, typeof q.hint === "function" ? q.hint(a) : q.hint) : null, q.suffix ? h("div", { class: "with-suffix" }, control, h("span", { class: "suffix" }, q.suffix)) : control);
     }
 
     function renderForm(keepFocus) {

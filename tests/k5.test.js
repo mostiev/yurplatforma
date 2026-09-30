@@ -34,7 +34,7 @@ t("защищённые выплаты — 0; срок погашения дол
   assert.equal(p.summary[0].value, "0 ₽"); assert.equal(p.related[0].id, "d40");
   const r = run({ income: 60000, debt_sum: 100000 });
   assert.equal(val(r, "Долг погасится"), "4 мес.");
-  assert(r.notes.some(n => n.includes("7%")));
+  assert(r.notes.some(n => n.includes("12%") && n.includes("2 000 ₽")));
 });
 
 done();
