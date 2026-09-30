@@ -146,3 +146,24 @@ footer.site { border-top: 1px solid var(--line); padding-block: 20px 32px; color
 .calc-h { margin: 18px 0 0; padding-top: 14px; border-top: 2px solid var(--line); font-size: 17px; }
 .wiz .step-title + .calc-h { margin-top: 4px; padding-top: 0; border-top: 0; }
 .calc-h + .field { border-top: 0; }
+
+/* мастер «Что делать, если» */
+.wz { max-width: 760px; padding-bottom: 56px; }
+.wz-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; }
+.wz-trail { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 14px; padding: 0; list-style: none; font-size: 13px; color: var(--muted); }
+.wz-trail li { background: var(--bg); border: 1px solid var(--line); border-radius: 999px; padding: 2px 10px; }
+.wz-q { margin: 0 0 14px; font-size: 22px; }
+.wz-opts { display: grid; gap: 8px; }
+.wz-opt { text-align: left; font: inherit; display: grid; gap: 2px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); cursor: pointer; }
+.wz-opt:hover { border-color: var(--accent); background: var(--accent-soft); }
+.wz-opt:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.wz-opt .h { font-size: 13px; color: var(--muted); }
+.wz-plan { margin: 0; padding: 0; list-style: none; counter-reset: s; display: grid; gap: 12px; }
+.wz-plan li { counter-increment: s; display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 10px; }
+.wz-plan li::before { content: counter(s); width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); font-weight: 700; font-size: 13px; }
+.wz-plan p { margin: 2px 0 6px; }
+.wz-link { display: inline-flex; align-items: baseline; gap: 8px; text-decoration: none; color: var(--accent); font-weight: 600; }
+.wz-link .tag { font-size: 12px; border-radius: 999px; padding: 1px 8px; background: var(--accent-soft); }
+.wz-note { margin-top: 16px; background: var(--warn-bg); border-left: 3px solid var(--warn-line); padding: 10px 14px; border-radius: 0 8px 8px 0; font-size: 14px; }
+.wz-nav { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+.hero-cta { display: inline-block; margin-top: 16px; font-weight: 600; color: var(--accent); }
