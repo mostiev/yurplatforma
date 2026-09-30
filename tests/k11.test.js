@@ -10,6 +10,7 @@ t("1/4 от средней зарплаты, с 15 января по 31 март
   assert.equal(r.table.rows.length, 3);
   assert.equal(r.table.rows[0][0], "январь 2026 (17 из 31 дн.)");
   assert(r.notes.some(n => n.includes("п. 4 ст. 113")) && r.notes.some(n => n.includes("5.35.1")) && r.notes.some(n => n.includes("ст. 67")));
+  assert(r.notes.some(n => n.includes("Куда подавать иск") && n.includes("мировому судье")));
 });
 
 t("неустойка по каждому месяцу: 0,1% × дни", () => {
@@ -20,7 +21,7 @@ t("неустойка по каждому месяцу: 0,1% × дни", () => {
 
 t("средняя зарплата по умолчанию — Росстат; доход известен; твёрдая сумма", () => {
   const d = run({ from: "2026-01-01", to: "2026-01-31" });
-  assert.equal(val(d, "Начислено"), "28 685,75 ₽"); // 114 743 × 1/4
+  assert.equal(val(d, "Начислено"), U.money(Math.round(C.AVGWAGE.value * 25) / 100).replace(/\u00a0/g, " ") + " ₽"); // средняя зарплата × 1/4 — не зависит от обновления AVGWAGE
   const k = run({ from: "2026-01-01", to: "2026-01-31", income_mode: "known", income: 60000, share: "1/3" });
   assert.equal(val(k, "Начислено"), "20 000 ₽");
   const f = run({ kind: "fixed", fixed: 15000, from: "2026-01-01", to: "2026-02-28" });

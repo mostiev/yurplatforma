@@ -28,6 +28,12 @@ t("иск о неустойке: таблица по месяцам, цена и
   assert(r.text.includes("ИСКОВОЕ ЗАЯВЛЕНИЕ") && r.text.includes("пп. 15 п. 1 ст. 333.36 НК РФ") && r.text.includes("п. 64 постановления Пленума"));
   assert(r.text.includes("Цена иска: 22 730 руб.")); // 15 000 × 0,242 + 25 000 × 0,764
   assert(r.text.includes("по вине ответчика"));
+  assert.equal(r.d.courtKind, "мировой судья");
+  const g = spec.guidance(r.a, r.d); assert(g.some(x => x.title === "Подавайте мировому судье."));
+  const big = run(base, { route: "court", court: "Хамовнический районный суд", from: "2024-01-01", avg_wage: 120000 });
+  assert.equal(big.d.courtKind, "районный суд");
+  const hint = spec.steps.find(s => s.id === "court").questions[0].hint(big.a, big.d);
+  assert(hint.includes("районный суд") && hint.includes("ч. 3 ст. 29"));
   assert.deepEqual(allErrors(r.a), []); assert(!r.text.includes("⟨"));
   writeDocx("d62.docx", r.a, r.d);
 });

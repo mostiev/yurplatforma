@@ -215,7 +215,7 @@
       return h("div", { class: "field" + (err ? " has-err" : ""), "data-q": q.id },
         h("label", { class: "field-l", id: id + "-l", for: q.type === "choice" ? null : id }, q.label,
           q.required === false ? h("span", { class: "opt" }, " — необязательно") : null),
-        q.hint ? h("p", { class: "field-h" }, q.hint) : null,
+        q.hint ? h("p", { class: "field-h" }, typeof q.hint === "function" ? q.hint(state.a, spec.derive(state.a)) : q.hint) : null,
         q.suffix ? h("div", { class: "with-suffix" }, control, h("span", { class: "suffix" }, q.suffix)) : control,
         err ? h("p", { class: "field-e", role: "alert" }, err) : null);
     }
