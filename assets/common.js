@@ -368,9 +368,11 @@
         { id: p + "_ogrn", type: "text", label: a => org(a) ? "ОГРН" : "ОГРНИП", required: false, show: a => !person(a), validate: (v, a) => (org(a) ? /^\d{13}$/ : /^\d{15}$/).test(String(v).trim()) ? null : org(a) ? "ОГРН — 13 цифр" : "ОГРНИП — 15 цифр" },
         { id: p + "_kpp", type: "text", label: "КПП", required: false, show: org, validate: v => /^\d{9}$/.test(String(v).trim()) ? null : "КПП — 9 цифр" },
         { id: p + "_address", type: "text", label: a => org(a) ? "Юридический адрес" : person(a) ? "Адрес регистрации" : "Адрес" },
-        { id: p + "_head_pos", type: "text", label: "Должность подписанта", show: org, placeholder: "Генеральный директор" },
-        { id: p + "_head", type: "text", label: "ФИО подписанта", show: org, placeholder: "Иванов Иван Иванович" },
-        { id: p + "_basis", type: "text", label: "Подписант действует на основании", required: false, show: org, placeholder: "Устава" },
+        ...(o.noSigner ? [] : [
+          { id: p + "_head_pos", type: "text", label: "Должность подписанта", show: org, placeholder: "Генеральный директор" },
+          { id: p + "_head", type: "text", label: "ФИО подписанта", show: org, placeholder: "Иванов Иван Иванович" },
+          { id: p + "_basis", type: "text", label: "Подписант действует на основании", required: false, show: org, placeholder: "Устава" },
+        ]),
         { id: p + "_email", type: "email", label: "E-mail для документов и уведомлений", required: o.emailRequired === true },
         ...(o.bank ? [
           { id: p + "_bank", type: "text", label: "Банк", required: false, placeholder: "ПАО Сбербанк" },
