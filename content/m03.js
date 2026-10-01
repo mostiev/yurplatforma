@@ -14,7 +14,7 @@
     code: "М-03",
     title: "Договор найма квартиры с иностранцем",
     lead: "Договор найма, когда жилец — иностранный гражданин: все условия обычного договора плюс обязанности по миграционному учёту. Займёт около 10 минут.",
-    defaults: { tn_foreign: "yes" },
+    defaults: Object.assign({}, base.defaults, { tn_foreign: "yes" }),
     fileName(a) { return "Договор найма с иностранным гражданином" + (a.address ? " — " + String(a.address).slice(0, 40) : ""); },
   });
 })(typeof window !== "undefined" ? window : globalThis);

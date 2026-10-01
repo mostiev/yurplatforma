@@ -58,6 +58,10 @@
         h("button", { class: "btn ghost", type: "button", onclick: () => U.saveFile(icsText(ev), (fileName || "Сроки") + ".ics", "text/calendar;charset=utf-8") }, "Добавить в календарь"),
         h("p", { class: "field-h" }, "Скачается файл .ics — откройте его, и сроки появятся в календаре телефона или компьютера с напоминанием накануне."));
     },
+    // поле-таблица: только строки, где хоть что-то заполнено
+    rows(v) {
+      return (Array.isArray(v) ? v : []).filter(r => r && typeof r === "object" && Object.values(r).some(x => x !== undefined && x !== null && String(x).trim() !== ""));
+    },
     // дата "YYYY-MM-DD" → Date (полночь по местному времени)
     date(s) {
       if (!s || !/^\d{4}-\d{2}-\d{2}$/.test(s)) return null;
@@ -105,13 +109,20 @@
   }
 
   function validateQuestion(q, a, d) {
-    const v = a[q.id];
+    const v = q.type === "rows" ? U.rows(a[q.id]) : a[q.id];
     const required = q.required !== false;
     const empty = v === undefined || v === null || v === "" || (Array.isArray(v) && !v.length);
     if (empty) return required ? "Заполните это поле" : null;
     if (q.type === "date" && !U.date(v)) return "Укажите дату";
     if ((q.type === "money" || q.type === "number") && (isNaN(v) || Number(v) < (q.min ?? 0))) return "Укажите число";
-    if (q.type === "multi") {
+    if (q.type === "rows") {
+      for (let i = 0; i < v.length; i++) for (const c of q.columns) {
+        const x = v[i][c.id];
+        if (c.required && (x === undefined || x === null || String(x).trim() === "")) return `Заполните «${c.label}» в строке ${i + 1}`;
+        if (c.type === "number" && x !== undefined && x !== "" && (isNaN(x) || Number(x) < 0)) return `«${c.label}» в строке ${i + 1} — число`;
+      }
+      if (q.max && v.length > q.max) return `Не больше ${q.max} строк`;
+    } else if (q.type === "multi") {
       if (!Array.isArray(v) || v.some(x => !q.options.find(o => o.value === x))) return "Выберите варианты";
     } else if (q.options) {
       const opt = q.options.find(o => o.value === v);
@@ -233,6 +244,49 @@
           id, onchange: e => { state.touched[q.id] = true; set(q.id, e.target.value); },
         }, h("option", { value: "" }, "Выберите…"),
           q.options.map(opt => h("option", { value: opt.value, selected: v === opt.value, disabled: !!optionState(q, opt, state.a, d) }, opt.label)));
+      } else if (q.type === "rows") {
+        // таблица строк: значение — массив объектов { [column.id]: значение }
+        const cols = q.columns;
+        const shown = Array.isArray(v) && v.length ? v : [{}];
+        const live = () => Array.isArray(state.a[q.id]) ? state.a[q.id] : (state.a[q.id] = shown.map(r => Object.assign({}, r)));
+        const cellId = (i, c) => `${id}-${i}-${c.id}`;
+        const addRow = row => {
+          const next = U.rows(state.a[q.id]).concat([row || {}]);
+          set(q.id, next);
+          const el = document.getElementById(cellId(next.length - 1, cols[row ? Math.min(1, cols.length - 1) : 0]));
+          if (el) el.focus();
+        };
+        const first = cols[0].id;
+        const have = new Set(U.rows(v).map(r => String(r[first] || "").trim().toLowerCase()));
+        const presets = (q.presets || []).map(p => typeof p === "string" ? { label: p, row: { [first]: p } } : p).filter(p => !have.has(String(p.row[first]).toLowerCase()));
+        const canAdd = !q.max || U.rows(v).length < q.max;
+        control = h("div", { class: "rows", id, role: "group", "aria-labelledby": id + "-l", style: `--cols: ${cols.map(c => c.w || "1fr").join(" ")}` },
+          cols.length > 1 ? h("div", { class: "rows-h", "aria-hidden": "true" }, cols.map(c => h("span", {}, c.label)), h("span")) : null,
+          shown.map((row, i) => h("div", { class: "rows-r" + (cols.length > 1 ? "" : " one") },
+            cols.map(c => {
+              const common = {
+                id: cellId(i, c), "aria-label": `${c.label}, строка ${i + 1}`,
+                onchange: () => { state.touched[q.id] = true; },
+              };
+              if (c.type === "select") {
+                const sel = h("select", Object.assign(common, { onchange: e => { const arr = live(); arr[i] = Object.assign({}, arr[i], { [c.id]: e.target.value || undefined }); state.touched[q.id] = true; prune(spec, state.a); renderForm(false); renderPreview(); } }),
+                  h("option", { value: "" }, c.placeholder || c.label), c.options.map(o => h("option", { value: o.value, selected: row[c.id] === o.value }, o.label)));
+                return sel;
+              }
+              const num = c.type === "number";
+              const inp = h("input", Object.assign(common, {
+                type: num ? "number" : "text", inputmode: num ? "decimal" : null, min: num ? 0 : null, step: num ? "any" : null,
+                placeholder: c.placeholder || c.label,
+                oninput: e => { const arr = live(); const raw = e.target.value; arr[i] = Object.assign({}, arr[i], { [c.id]: raw === "" ? undefined : num ? Number(raw) : raw }); renderPreview(); },
+              }));
+              inp.value = row[c.id] ?? "";
+              return inp;
+            }),
+            h("button", { type: "button", class: "rows-x", "aria-label": `Удалить строку ${i + 1}`, title: "Удалить строку",
+              onclick: () => { const arr = (Array.isArray(state.a[q.id]) ? state.a[q.id] : []).filter((_, j) => j !== i); state.touched[q.id] = true; set(q.id, arr.length ? arr : undefined); } }, "×"))),
+          h("div", { class: "rows-add" },
+            canAdd ? h("button", { type: "button", class: "btn ghost sm", onclick: () => addRow() }, q.addLabel || "+ Добавить строку") : null,
+            canAdd && presets.length ? h("div", { class: "chips" }, h("span", { class: "chips-l" }, "Быстро:"), presets.map(p => h("button", { type: "button", class: "chip", onclick: () => addRow(Object.assign({}, q.presetDefaults || {}, p.row)) }, "+ " + p.label))) : null));
       } else if (q.type === "textarea") {
         control = h("textarea", {
           id, rows: 4, placeholder: q.placeholder || "",
@@ -260,7 +314,7 @@
       }
 
       return h("div", { class: "field" + (err ? " has-err" : ""), "data-q": q.id },
-        h("label", { class: "field-l", id: id + "-l", for: q.type === "choice" ? null : id }, q.label,
+        h("label", { class: "field-l", id: id + "-l", for: q.type === "choice" || q.type === "rows" ? null : id }, typeof q.label === "function" ? q.label(state.a, d) : q.label,
           q.required === false ? h("span", { class: "opt" }, " — необязательно") : null),
         q.hint ? h("p", { class: "field-h" }, typeof q.hint === "function" ? q.hint(state.a, spec.derive(state.a)) : q.hint) : null,
         q.suffix ? h("div", { class: "with-suffix" }, control, h("span", { class: "suffix" }, q.suffix)) : control,
