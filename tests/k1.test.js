@@ -2,7 +2,7 @@
 const assert = require("assert");
 const { run, val, t, done } = require("./_loadcalc")("k1");
 
-t("возврат денег за товар: 10 дней с требования, 1% в день без предела", () => {
+t("возврат денег за товар: 10 дней с требования, 1% в день", () => {
   const r = run({ kind: "refund", price: 50000, demand_date: "2026-08-03", done: "yes", done_date: "2026-09-02" });
   assert.equal(val(r, "Дней просрочки"), "20");
   assert.equal(val(r, "Неустойка в день"), "500 ₽");
@@ -41,6 +41,14 @@ t("нет просрочки — ошибка; нет данных — пуст�
   assert.equal(run({ kind: "work" }), null);
   const r = run({ kind: "refund", price: 1000, demand_date: "2022-03-01", done: "yes", done_date: "2022-05-01" });
   assert(r.notes.some(n => n.includes("ПП № 497")));
+});
+
+t("500-ФЗ: покупка с 01.02.2026 — неустойка не больше цены; до — без предела", () => {
+  const after = run({ kind: "refund", price: 1000, demand_date: "2026-03-01", done: "yes", done_date: "2026-09-01" });
+  assert.equal(after.summary.find(s => s.big).value, "1 000 ₽");
+  assert(after.notes[0].includes("500-ФЗ"));
+  const before = run({ kind: "refund", price: 1000, bought: "before", demand_date: "2026-03-01", done: "yes", done_date: "2026-09-01" });
+  assert(Number(before.summary.find(s => s.big).value.replace(/\D/g, "")) > 1000);
 });
 
 done();

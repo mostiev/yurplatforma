@@ -76,7 +76,7 @@ t("ответ на сумму не стирается, хотя у вопрос�
 });
 
 t("маркетплейс и частное лицо — стоп", () => {
-  assert(run({ channel: "marketplace" }).stop); assert(run({ channel: "private" }).stop);
+  assert(run({ channel: "marketplace" }).stop.link.href === "d06.html"); assert(run({ channel: "private" }).stop);
 });
 
 t("недостаток через 2,5 года без гарантии — стоп; с гарантией 3 года — нет", () => {

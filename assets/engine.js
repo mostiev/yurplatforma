@@ -110,7 +110,7 @@
 
   function validateQuestion(q, a, d) {
     const v = q.type === "rows" ? U.rows(a[q.id]) : a[q.id];
-    const required = q.required !== false;
+    const required = typeof q.required === "function" ? !!q.required(a, d) : q.required !== false;
     const empty = v === undefined || v === null || v === "" || (Array.isArray(v) && !v.length);
     if (empty) return required ? "Заполните это поле" : null;
     if (q.type === "date" && !U.date(v)) return "Укажите дату";
@@ -120,6 +120,7 @@
         const x = v[i][c.id];
         if (c.required && (x === undefined || x === null || String(x).trim() === "")) return `Заполните «${c.label}» в строке ${i + 1}`;
         if (c.type === "number" && x !== undefined && x !== "" && (isNaN(x) || Number(x) < 0)) return `«${c.label}» в строке ${i + 1} — число`;
+        if (c.type === "date" && x && !U.date(x)) return `«${c.label}» в строке ${i + 1} — дата`;
       }
       if (q.max && v.length > q.max) return `Не больше ${q.max} строк`;
     } else if (q.type === "multi") {
@@ -275,7 +276,7 @@
               }
               const num = c.type === "number";
               const inp = h("input", Object.assign(common, {
-                type: num ? "number" : "text", inputmode: num ? "decimal" : null, min: num ? 0 : null, step: num ? "any" : null,
+                type: num ? "number" : c.type === "date" ? "date" : "text", inputmode: num ? "decimal" : null, min: num ? 0 : null, step: num ? "any" : null,
                 placeholder: c.placeholder || c.label,
                 oninput: e => { const arr = live(); const raw = e.target.value; arr[i] = Object.assign({}, arr[i], { [c.id]: raw === "" ? undefined : num ? Number(raw) : raw }); renderPreview(); },
               }));
@@ -315,8 +316,8 @@
 
       return h("div", { class: "field" + (err ? " has-err" : ""), "data-q": q.id },
         h("label", { class: "field-l", id: id + "-l", for: q.type === "choice" || q.type === "rows" ? null : id }, typeof q.label === "function" ? q.label(state.a, d) : q.label,
-          q.required === false ? h("span", { class: "opt" }, " — необязательно") : null),
-        q.hint ? h("p", { class: "field-h" }, typeof q.hint === "function" ? q.hint(state.a, spec.derive(state.a)) : q.hint) : null,
+          (typeof q.required === "function" ? !q.required(state.a, d) : q.required === false) ? h("span", { class: "opt" }, " — необязательно") : null),
+        (() => { const t = typeof q.hint === "function" ? q.hint(state.a, d) : q.hint; return t ? h("p", { class: "field-h" }, t) : null; })(),
         q.suffix ? h("div", { class: "with-suffix" }, control, h("span", { class: "suffix" }, q.suffix)) : control,
         err ? h("p", { class: "field-e", role: "alert" }, err) : null);
     }
@@ -342,7 +343,7 @@
         h("h2", { class: "step-title" }, step.title),
         step.lead ? h("p", { class: "step-lead" }, step.lead) : null,
         visibleQuestions(spec, step, a, d).map(q => field(q, d, errs)),
-        stop ? h("div", { class: "stop", role: "status" }, h("strong", {}, stop.title), h("p", {}, stop.text)) : null,
+        stop ? h("div", { class: "stop", role: "status" }, h("strong", {}, stop.title), h("p", {}, stop.text), stop.link ? h("a", { class: "btn", href: stop.link.href }, stop.link.text) : null) : null,
         h("div", { class: "nav" },
           state.step > 0 ? h("button", { class: "btn ghost", type: "button", onclick: () => { state.step--; renderForm(true); } }, "Назад") : h("span"),
           h("button", {

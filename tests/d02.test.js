@@ -39,7 +39,7 @@ t("индивидуальный товар онлайн и потерянный 
 });
 
 t("маркетплейс и частное лицо — стоп", () => {
-  assert(run(store, { channel: "marketplace" }).stop);
+  assert(run(store, { channel: "marketplace" }).stop.link.href === "d06.html");
   assert(run(store, { channel: "private" }).stop);
 });
 

@@ -348,6 +348,134 @@
     clRequisites(a) {
       return `${F(a.cl_name, "заказчик")}` + (a.cl_type === "org" ? `\nИНН ${F(a.cl_inn, "ИНН")}` + (a.cl_ogrn ? `, ОГРН ${a.cl_ogrn}` : "") : "") + `\nАдрес: ${F(a.cl_address, "адрес")}`;
     },
+    // ---------- Стороны-предприниматели (ИП и организации) ----------
+    // p — префикс полей, who — «Исполнитель», «Заказчик» и т. п.; opts.bank — спросить банковские реквизиты
+    bizParty(p, who, opts) {
+      const o = opts || {};
+      const kind = a => a[p + "_kind"] || "org";
+      const org = a => kind(a) === "org";
+      const person = a => kind(a) === "person";
+      const lw = who.toLowerCase();
+      return [
+        { id: p + "_kind", type: "choice", label: `${who} — это`, options: [
+          { value: "org", label: "Организация (ООО, АО)" },
+          { value: "ip", label: "Индивидуальный предприниматель" },
+          ...(o.person ? [{ value: "person", label: "Физическое лицо", hint: o.personHint }] : []),
+        ] },
+        { id: p + "_name", type: "text", label: a => org(a) ? `Название (${lw})` : person(a) ? `ФИО (${lw})` : `ФИО предпринимателя (${lw})`, placeholder: "ООО «Ромашка» или Иванов Иван Иванович" },
+        { id: p + "_inn", type: "text", label: "ИНН", required: a => !person(a), hint: a => person(a) ? null : "Остальные реквизиты можно найти по ИНН в выписке ЕГРЮЛ/ЕГРИП на egrul.nalog.ru", validate: (v, a) => (org(a) ? /^\d{10}$/ : /^\d{12}$/).test(String(v).trim()) ? null : org(a) ? "ИНН организации — 10 цифр" : "ИНН физлица и ИП — 12 цифр" },
+        { id: p + "_passport", type: "text", label: "Паспорт: серия, номер, кем и когда выдан", show: person, placeholder: "45 12 345678, выдан ГУ МВД России по г. Москве 01.02.2020" },
+        { id: p + "_ogrn", type: "text", label: a => org(a) ? "ОГРН" : "ОГРНИП", required: false, show: a => !person(a), validate: (v, a) => (org(a) ? /^\d{13}$/ : /^\d{15}$/).test(String(v).trim()) ? null : org(a) ? "ОГРН — 13 цифр" : "ОГРНИП — 15 цифр" },
+        { id: p + "_kpp", type: "text", label: "КПП", required: false, show: org, validate: v => /^\d{9}$/.test(String(v).trim()) ? null : "КПП — 9 цифр" },
+        { id: p + "_address", type: "text", label: a => org(a) ? "Юридический адрес" : person(a) ? "Адрес регистрации" : "Адрес" },
+        { id: p + "_head_pos", type: "text", label: "Должность подписанта", show: org, placeholder: "Генеральный директор" },
+        { id: p + "_head", type: "text", label: "ФИО подписанта", show: org, placeholder: "Иванов Иван Иванович" },
+        { id: p + "_basis", type: "text", label: "Подписант действует на основании", required: false, show: org, placeholder: "Устава" },
+        { id: p + "_email", type: "email", label: "E-mail для документов и уведомлений", required: o.emailRequired === true },
+        ...(o.bank ? [
+          { id: p + "_bank", type: "text", label: "Банк", required: false, placeholder: "ПАО Сбербанк" },
+          { id: p + "_account", type: "text", label: "Расчётный счёт", required: false, validate: v => /^\d{20}$/.test(String(v).replace(/\s/g, "")) ? null : "Номер счёта — 20 цифр" },
+          { id: p + "_bik", type: "text", label: "БИК", required: false, validate: v => /^\d{9}$/.test(String(v).trim()) ? null : "БИК — 9 цифр" },
+        ] : []),
+      ];
+    },
+    // строка преамбулы: «ООО «Ромашка» (ИНН …), именуемое в дальнейшем «Заказчик», от имени которого действует …»
+    bizLine(a, p, role) {
+      const ip = a[p + "_kind"] === "ip";
+      if (a[p + "_kind"] === "person") return `${F(a[p + "_name"], "ФИО")}, паспорт ${F(a[p + "_passport"], "паспорт")}` + (a[p + "_inn"] ? `, ИНН ${a[p + "_inn"]}` : "") + `, зарегистрированный(ая) по адресу: ${F(a[p + "_address"], "адрес")}, именуемый(ая) в дальнейшем «${role}»`;
+      const ids = `ИНН ${F(a[p + "_inn"], "ИНН")}` + (a[p + "_ogrn"] ? `, ${ip ? "ОГРНИП" : "ОГРН"} ${a[p + "_ogrn"]}` : "");
+      if (ip) return `индивидуальный предприниматель ${F(a[p + "_name"], "ФИО")} (${ids}), именуемый(ая) в дальнейшем «${role}»`;
+      const pos = a[p + "_head_pos"] ? a[p + "_head_pos"][0].toLowerCase() + a[p + "_head_pos"].slice(1) : null;
+      return `${F(a[p + "_name"], "организация")} (${ids}), именуемое в дальнейшем «${role}», от имени которого действует ${F(pos, "должность")} ${F(a[p + "_head"], "ФИО подписанта")} на основании ${a[p + "_basis"] || "Устава"}`;
+    },
+    bizName(a, p) { return a[p + "_kind"] === "ip" ? `ИП ${F(a[p + "_name"], "ФИО")}` : F(a[p + "_name"], a[p + "_kind"] === "person" ? "ФИО" : "организация"); },
+    bizRequisites(a, p) {
+      const ip = a[p + "_kind"] === "ip";
+      if (a[p + "_kind"] === "person") return [F(a[p + "_name"], "ФИО"), `Паспорт: ${F(a[p + "_passport"], "паспорт")}`, a[p + "_inn"] ? `ИНН ${a[p + "_inn"]}` : null, `Адрес: ${F(a[p + "_address"], "адрес")}`, a[p + "_email"] ? `E-mail: ${a[p + "_email"]}` : null, a[p + "_account"] ? `Счёт ${String(a[p + "_account"]).replace(/\s/g, "")}` + (a[p + "_bank"] ? ` в ${a[p + "_bank"]}` : "") : null, a[p + "_bik"] ? `БИК ${a[p + "_bik"]}` : null].filter(Boolean).join("\n");
+      return [
+        ip ? `ИП ${F(a[p + "_name"], "ФИО")}` : F(a[p + "_name"], "организация"),
+        `ИНН ${F(a[p + "_inn"], "ИНН")}` + (a[p + "_kpp"] && !ip ? `, КПП ${a[p + "_kpp"]}` : ""),
+        a[p + "_ogrn"] ? `${ip ? "ОГРНИП" : "ОГРН"} ${a[p + "_ogrn"]}` : null,
+        `Адрес: ${F(a[p + "_address"], "адрес")}`,
+        a[p + "_email"] ? `E-mail: ${a[p + "_email"]}` : null,
+        a[p + "_account"] ? `Р/с ${String(a[p + "_account"]).replace(/\s/g, "")}` + (a[p + "_bank"] ? ` в ${a[p + "_bank"]}` : "") : null,
+        a[p + "_bik"] ? `БИК ${a[p + "_bik"]}` : null,
+      ].filter(Boolean).join("\n");
+    },
+    bizSignature(a, p) {
+      const ip = a[p + "_kind"] === "ip";
+      if (a[p + "_kind"] === "person") return `\n____________ / ${F(U.shortName(a[p + "_name"]), "И. О. Фамилия")}`;
+      return ip
+        ? `Индивидуальный предприниматель\n\n____________ / ${F(U.shortName(a[p + "_name"]), "И. О. Фамилия")}`
+        : `${F(a[p + "_head_pos"], "должность")}\n\n____________ / ${F(U.shortName(a[p + "_head"]), "И. О. Фамилия")}\nМ. П. (при наличии)`;
+    },
+    // таблица «Реквизиты и подписи сторон»: sides — [[префикс, роль], [префикс, роль]]
+    bizSignTable(P, a, sides) {
+      P.push({ text: "Реквизиты и подписи сторон", align: "center", bold: true, before: 240, after: 120, keepNext: true });
+      P.push({ table: { widths: [4677, 4678], head: 1, rows: [sides.map(s => s[1]), sides.map(s => C.bizRequisites(a, s[0]) + "\n\n" + C.bizSignature(a, s[0]))] } });
+    },
+    // НДС в цене: none — освобождение (ст. 145 НК, в 2026 году — УСН с доходом до 20 млн ₽), 5 / 7 — УСН, 22 — общая ставка
+    vatQuestion(id, who) {
+      return { id: id || "vat", type: "choice", label: who ? `НДС: ${who}` : "НДС в цене", hint: "С 2026 года упрощенцы с доходом больше 20 млн ₽ в год платят НДС 5% или 7% (или 22% с вычетами)", options: [
+        { value: "none", label: "Без НДС", hint: "УСН с доходом до 20 млн ₽, освобождение по ст. 145 НК" },
+        { value: "5", label: "НДС 5%", hint: "УСН, доход до 272,5 млн ₽" },
+        { value: "7", label: "НДС 7%", hint: "УСН, доход до 490,5 млн ₽" },
+        { value: "22", label: "НДС 22%", hint: "Общая система" },
+      ] };
+    },
+    vatText(sum, vat) {
+      if (!vat || vat === "none") return "НДС не облагается на основании ст. 145 Налогового кодекса РФ";
+      const r = Number(vat);
+      const tax = Math.round(sum * r / (100 + r) * 100) / 100;
+      return `в том числе НДС ${r}% — ${U.money(tax)} руб.`;
+    },
+
+    // госпошлина в арбитражный суд по имущественному иску (пп. 1 п. 1 ст. 333.21 НК, ред. 259-ФЗ с 08.09.2024)
+    arbFee(price) {
+      const p = Math.max(0, Number(price) || 0);
+      const fee = p <= 100000 ? 10000 : p <= 1e6 ? 10000 + (p - 100000) * 0.05 : p <= 1e7 ? 55000 + (p - 1e6) * 0.03 : p <= 5e7 ? 325000 + (p - 1e7) * 0.01 : 725000 + (p - 5e7) * 0.005;
+      return Math.round(Math.min(fee, 1e7));
+    },
+    // за судебный приказ — 50% от пошлины по иску, не меньше 8 000 ₽ (пп. 3 п. 1 ст. 333.21 НК)
+    arbOrderFee(price) { return Math.max(8000, Math.round(C.arbFee(price) / 2)); },
+
+    // документооборот, претензии и подсудность в договорах между предпринимателями
+    bizTermsQuestions() {
+      return [
+        { id: "edo", type: "choice", label: "Как обмениваться документами", options: [
+          { value: "email", label: "Сканы по электронной почте", hint: "Быстро; оригиналы — по требованию" },
+          { value: "edo", label: "Через ЭДО с электронной подписью (КЭП)" },
+          { value: "paper", label: "Только на бумаге" },
+        ] },
+        { id: "claim_days", type: "choice", label: "Срок ответа на претензию до суда", hint: "Если не указать — 30 дней (ч. 5 ст. 4 АПК)", options: [
+          { value: 10, label: "10 дней" }, { value: 15, label: "15 дней" }, { value: 30, label: "30 дней" },
+        ] },
+        { id: "court", type: "choice", label: "Где судиться", options: [
+          { value: "defendant", label: "По месту нахождения ответчика", hint: "Как в законе" },
+          { value: "plaintiff", label: "По месту нахождения истца", hint: "Выгодно тому, кто чаще будет требовать" },
+          { value: "named", label: "В конкретном суде" },
+        ] },
+        { id: "court_name", type: "text", label: "Какой суд", show: a => a.court === "named", placeholder: "Арбитражный суд города Москвы" },
+      ];
+    },
+    bizFinalClauses(a) {
+      const out = [];
+      out.push({
+        email: "Стороны признают юридическую силу договора, приложений, дополнительных соглашений, счетов, актов, претензий и уведомлений, переданных в виде сканов подписанных документов по электронной почте с адресов, указанных в реквизитах сторон. Сообщение считается полученным в день его отправки, если отправлено в рабочий день до 18:00 по времени получателя, иначе — в следующий рабочий день. По требованию стороны оригиналы направляются почтой в течение 10 рабочих дней.",
+        edo: "Договор, приложения, первичные документы, претензии и уведомления подписываются квалифицированными электронными подписями и передаются через операторов электронного документооборота. Такие документы равнозначны документам на бумаге, подписанным собственноручно (ст. 6 Федерального закона № 63-ФЗ «Об электронной подписи»).",
+        paper: "Документы по договору составляются на бумаге и вручаются под подпись или направляются заказным письмом с уведомлением о вручении по адресам, указанным в реквизитах сторон.",
+      }[a.edo] || F(null, "порядок обмена документами"));
+      out.push(`Споры разрешаются в претензионном порядке. Спор может быть передан в суд по истечении ${F(a.claim_days, "срок")} календарных дней со дня направления претензии (ч. 5 ст. 4 АПК РФ).`);
+      out.push({
+        defendant: "Неурегулированные споры рассматриваются в арбитражном суде по месту нахождения ответчика.",
+        plaintiff: "Неурегулированные споры рассматриваются в арбитражном суде по месту нахождения истца (ст. 37 АПК РФ).",
+        named: `Неурегулированные споры передаются на рассмотрение в суд: ${F(a.court_name, "суд")} (ст. 37 АПК РФ).`,
+      }[a.court] || F(null, "подсудность"));
+      out.push("Изменения и дополнения к договору действительны, если совершены в письменной форме и подписаны уполномоченными представителями сторон. Во всём, что не предусмотрено договором, стороны руководствуются законодательством Российской Федерации.");
+      out.push(a.edo === "edo" ? "Договор подписан в электронной форме и вступает в силу с момента подписания обеими сторонами." : "Договор составлен в двух экземплярах, по одному для каждой стороны, и вступает в силу с момента подписания.");
+      return out;
+    },
+
     // «наименование; количество; цена» построчно
     parseLines(text) {
       return String(text || "").split("\n").map(s => s.trim()).filter(Boolean).map(line => {
