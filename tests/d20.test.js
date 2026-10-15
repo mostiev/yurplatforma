@@ -12,7 +12,7 @@ t("совместное заявление: п. 1 ст. 19 СК, ст. 33 143-Ф
 });
 
 t("дети или несогласие — стоп, отправляем в суд (Д-21)", () => {
-  assert(run(base, { kids: "yes" }).stop.text.includes("Д-21")); assert(run(base, { agree: "no" }).stop);
+  assert(run(base, { kids: "yes" }).stop.link.href === "d21.html"); assert(run(base, { agree: "no" }).stop);
 });
 
 t("подсказки: 5000 с каждого; нотариус, если один не может прийти", () => {

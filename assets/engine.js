@@ -290,7 +290,7 @@
             canAdd && presets.length ? h("div", { class: "chips" }, h("span", { class: "chips-l" }, "Быстро:"), presets.map(p => h("button", { type: "button", class: "chip", onclick: () => addRow(Object.assign({}, q.presetDefaults || {}, p.row)) }, "+ " + p.label))) : null));
       } else if (q.type === "textarea") {
         control = h("textarea", {
-          id, rows: 4, placeholder: q.placeholder || "",
+          id, rows: 4, placeholder: (typeof q.placeholder === "function" ? q.placeholder(state.a, d) : q.placeholder) || "",
           oninput: e => { state.a[q.id] = e.target.value; if (!e.target.value) delete state.a[q.id]; renderPreview(); },
           onblur: () => { state.touched[q.id] = true; prune(spec, state.a); renderForm(false); renderPreview(); },
         });
@@ -298,7 +298,7 @@
       } else {
         const type = q.type === "date" ? "date" : (q.type === "money" || q.type === "number") ? "number" : q.type === "email" ? "email" : q.type === "tel" ? "tel" : "text";
         control = h("input", {
-          id, type, placeholder: q.placeholder || "", inputmode: q.type === "money" ? "decimal" : null,
+          id, type, placeholder: (typeof q.placeholder === "function" ? q.placeholder(state.a, d) : q.placeholder) || "", inputmode: q.type === "money" ? "decimal" : null,
           min: q.type === "money" || q.type === "number" ? (q.min ?? 0) : null, step: q.type === "money" ? "0.01" : null,
           // по умолчанию дата — прошедшее событие; future: true — можно выбрать будущую дату
           max: q.type === "date" && !q.future ? U.iso(U.today()) : null,
@@ -322,6 +322,17 @@
         err ? h("p", { class: "field-e", role: "alert" }, err) : null);
     }
 
+    // стоп — не тупик: ссылка на другой документ (link), кнопка, меняющая ответ (action), или мягкое предупреждение (soft)
+    function stopBox(stop) {
+      const acts = [];
+      if (stop.action) acts.push(h("button", { class: "btn", type: "button", onclick: () => {
+        Object.entries(stop.action.set || {}).forEach(([k, v]) => { if (v === undefined || v === null) delete state.a[k]; else state.a[k] = v; });
+        prune(spec, state.a); renderForm(false); renderPreview();
+      } }, stop.action.text));
+      if (stop.link) acts.push(h("a", { class: stop.action ? "btn ghost" : "btn", href: stop.link.href }, stop.link.text));
+      return h("div", { class: "stop" + (stop.soft ? " soft" : ""), role: "status" }, h("strong", {}, stop.title), h("p", {}, stop.text), acts.length ? h("div", { class: "stop-acts" }, acts) : null);
+    }
+
     function renderForm(focusTop) {
       const a = state.a, d = spec.derive(a);
       const active = document.activeElement && document.activeElement.id;
@@ -339,15 +350,15 @@
       add($form,
         h("ol", { class: "steps", "aria-label": "Шаги" },
           steps.map((s, i) => h("li", { class: i === state.step ? "cur" : i < state.step ? "past" : "" },
-            h("span", { class: "n" }, String(i + 1)), h("span", { class: "t" }, s.title)))),
-        h("h2", { class: "step-title" }, step.title),
+            h("span", { class: "n" }, String(i + 1)), h("span", { class: "t" }, typeof s.title === "function" ? s.title(a, d) : s.title)))),
+        h("h2", { class: "step-title" }, typeof step.title === "function" ? step.title(a, d) : step.title),
         step.lead ? h("p", { class: "step-lead" }, step.lead) : null,
         visibleQuestions(spec, step, a, d).map(q => field(q, d, errs)),
-        stop ? h("div", { class: "stop", role: "status" }, h("strong", {}, stop.title), h("p", {}, stop.text), stop.link ? h("a", { class: "btn", href: stop.link.href }, stop.link.text) : null) : null,
+        stop ? stopBox(stop) : null,
         h("div", { class: "nav" },
           state.step > 0 ? h("button", { class: "btn ghost", type: "button", onclick: () => { state.step--; renderForm(true); } }, "Назад") : h("span"),
           h("button", {
-            class: "btn", type: "button", disabled: !!stop,
+            class: "btn", type: "button", disabled: !!stop && !stop.soft,
             onclick: () => {
               const e = stepErrors(spec, step, state.a);
               if (Object.keys(e).length) {
@@ -396,6 +407,7 @@
           copyBtn,
           h("button", { class: "btn ghost", type: "button", onclick: () => { state.done = false; state.step = spec.steps.filter(s => !s.show || s.show(state.a, spec.derive(state.a))).length - 1; renderForm(true); } }, "Изменить ответы")),
         spec.reminders ? U.remindersBlock(h, spec.reminders(a, d), "Сроки — " + (spec.fileName ? spec.fileName(a, d) : spec.title)) : null,
+        (() => { const st = spec.stop ? spec.stop(a, d) : null; return st && st.soft ? stopBox(st) : null; })(),
         guide.length ? h("div", { class: "guide" },
           h("h3", {}, "Что делать дальше"),
           h("ol", {}, guide.map(g => h("li", {}, h("strong", {}, g.title), " ", g.text)))) : null,

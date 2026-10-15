@@ -47,11 +47,11 @@ t("приказ отменён — иск с зачётом пошлины; ча
 });
 
 t("до востребования без требования — стоп; срок не наступил — стоп; без документов — стоп", () => {
-  assert(run(base, { due_type: "demand" }).stop.text.includes("Д-35"));
+  assert(run(base, { due_type: "demand" }).stop.link.href === "d35.html");
   const dm = run(base, { due_type: "demand", demand_date: "2026-08-01" });
   assert(!dm.stop && U.fmtDate(dm.d.due) === "31.08.2026");
   assert(run(base, { due_date: "2026-12-01" }).stop.title.includes("не наступил"));
-  assert(run(base, { basis: "none" }).stop);
+  assert(run(base, { basis: "none" }).stop.link.href === "d35.html");
 });
 
 done();

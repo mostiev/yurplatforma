@@ -64,4 +64,22 @@ t("суд: выдать лист и направить приставам", () =
   assert(run(base, { route: "court", send: "mail" }).text.includes("почтой по адресу: г. Москва, ул. Ленина, д. 5"));
 });
 
+t("истёк срок → кнопка ведёт на восстановление; заявление в суд", () => {
+  const old = { act_date: ago(50), entry_date: ago(40) };
+  const st = run(base, old).stop;
+  assert.deepEqual(st.action.set, { route: "restore" });
+  assert.equal(run(base, { route: "bank", what: "other", other_text: "x" }).stop.action.set.route, "fssp");
+  const r = run(base, Object.assign({}, old, { route: "restore", court_kind: "general", restore_reason: "Находился на длительном лечении с 2023 по 2026 год.", restore_proof: "выписные эпикризы" }));
+  assert(!r.stop, JSON.stringify(r.stop));
+  assert(r.text.includes("о восстановлении пропущенного срока предъявления") && r.text.includes("статей 112 и 432 Гражданского"));
+  assert(r.text.includes("по уважительной причине: Находился на длительном лечении с 2023 по 2026 год.") && r.text.includes("(3 000 ₽)") && r.text.includes(": выписные эпикризы."));
+  assert(!r.text.includes("БИК") && !r.text.includes("⟨") && !r.text.includes(".."));
+  assert.deepEqual(allErrors(r.a), []);
+  writeDocx("d60-restore.docx", r.a, r.d);
+  const arb = run(base, Object.assign({}, old, { route: "restore", court_kind: "arb", restore_reason: "x" }));
+  assert(arb.text.includes("статей 117 и 322 Арбитражного") && arb.text.includes("(10 000 ₽)") && arb.text.includes("направление копии заявления должнику"));
+  assert.equal(run(base, { route: "restore", court_kind: "general", restore_reason: "x" }).stop.action.set.route, "fssp");
+  assert(run(base, { route: "restore", court_kind: "general", what: "alimony", alimony_text: "1/4", restore_reason: "x" }).stop.title.includes("алиментам"));
+});
+
 done();

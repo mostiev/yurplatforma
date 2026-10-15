@@ -13,7 +13,7 @@ t("жалоба в ЦБ: адрес Неглинная, нарушения со 
 });
 
 t("коллекторы и мошенники — стоп с переадресацией; без претензии — совет начать с организации", () => {
-  assert(run(base, { org_type: "collector" }).stop.text.includes("Д-42")); assert(run(base, { org_type: "fraud" }).stop);
+  assert(run(base, { org_type: "collector" }).stop.link.href === "d42.html"); assert(run(base, { org_type: "fraud" }).stop.link.href === "d66.html");
   const r = run(base, { prior: "no" });
   assert.equal(r.a.prior_date, undefined); assert(spec.guidance(r.a, r.d)[0].title.includes("Сначала"));
 });

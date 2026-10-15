@@ -215,3 +215,6 @@ footer.site { border-top: 1px solid var(--line); padding-block: 20px 32px; color
   .rows-r:not(.one) > :first-child { grid-column: 1 / 3; }
   .rows-r:not(.one) > .rows-x { grid-column: 3; grid-row: 1; }
 }
+.stop.soft { background: var(--accent-soft); border-left-color: var(--accent); }
+.stop-acts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.stop p { margin: 6px 0 0; }
