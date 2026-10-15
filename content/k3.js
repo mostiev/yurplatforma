@@ -75,7 +75,7 @@
         table: { head: ["Период", "Дней", "Долг", "Ставка", "Сумма"], rows: r.parts.map(p => [`${U.fmtDate(p.from)}–${U.fmtDate(p.to)}`, String(p.days), U.money(p.base),
           p.rate === 0 ? "мораторий" : `${pct(p.rate)}% / ${p.yearDays}`, rub(p.sum)]) },
         notes,
-        related: [{ id: "d35", text: "Претензия о возврате долга" }, { id: "d32", text: "Претензия заказчику" }],
+        related: [{ id: "d35", text: "Претензия о возврате долга", fill: { amount: a.amount, term: a.due_date ? "date" : null, due_date: a.due_date } }, { id: "d32", text: "Претензия заказчику", fill: { amount: a.amount, due_date: a.due_date } }],
       };
     },
   };

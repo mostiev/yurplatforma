@@ -46,7 +46,7 @@
         control = h("input", { id, type: q.type === "date" ? "date" : num ? "number" : "text", min: num ? (q.min ?? 0) : null, step: q.type === "money" ? "0.01" : q.step || null, placeholder: q.placeholder || "",
           inputmode: q.type === "money" ? "decimal" : null,
           oninput: e => { const r = e.target.value; a[q.id] = r === "" ? undefined : num ? Number(r) : r; renderRes(); },
-          onchange: () => renderForm(true) });
+          onchange: () => soon() });
         control.value = v ?? "";
       }
       return h("div", { class: "field" },
@@ -54,7 +54,14 @@
         q.hint ? h("p", { class: "field-h" }, typeof q.hint === "function" ? q.hint(a) : q.hint) : null, q.suffix ? h("div", { class: "with-suffix" }, control, h("span", { class: "suffix" }, q.suffix)) : control);
     }
 
+    // перерисовка после ухода из поля — когда фокус уже в новом поле и кнопка мыши отпущена (иначе клик терялся)
+    let soonT = null, pointer = false, pending = false;
+    function soon() { clearTimeout(soonT); soonT = setTimeout(() => { if (pointer) { pending = true; return; } renderForm(true); }, 0); }
+    $form.addEventListener("pointerdown", () => { pointer = true; }, true);
+    global.addEventListener && global.addEventListener("pointerup", () => { pointer = false; if (pending) { pending = false; setTimeout(() => renderForm(true), 0); } }, true);
+
     function renderForm(keepFocus) {
+      clearTimeout(soonT); pending = false;
       const active = keepFocus && document.activeElement && document.activeElement.id;
       $form.textContent = "";
       $form.append(h("h2", { class: "step-title" }, "Данные"), ...spec.fields.filter(q => !q.show || q.show(a)).map(field));
@@ -85,8 +92,16 @@
       const copy = h("button", { class: "btn ghost", type: "button", onclick: async () => {
         try { await navigator.clipboard.writeText(text); copy.textContent = "Скопировано"; } catch (_) { copy.textContent = "Не вышло — выделите текст"; }
       } }, "Скопировать расчёт");
-      card.append(h("div", { class: "done-actions" }, copy, (r.related || []).map(x => h("a", { class: "btn", href: x.id + ".html" }, x.text))));
+      card.append(h("div", { class: "done-actions" }, copy, (r.related || []).map(x => h("a", { class: "btn", href: x.id + ".html", onclick: () => handoff(x) }, x.text + (x.fill ? " — с этими данными" : "")))));
       $res.append(card);
+    }
+
+    // перенос данных в документ: только в этой вкладке браузера (sessionStorage), никуда не отправляется
+    function handoff(x) {
+      if (!x.fill) return;
+      const fill = {};
+      Object.entries(x.fill).forEach(([k, v]) => { if (v !== undefined && v !== null && v !== "") fill[k] = v; });
+      try { global.sessionStorage.setItem("yp-prefill", JSON.stringify({ to: x.id, from: spec.code, at: Date.now(), a: fill })); } catch (e) { /* без хранилища — просто откроется документ */ }
     }
 
     renderForm(); renderRes();

@@ -111,7 +111,7 @@
         ].filter(Boolean),
         table: { head: ["Период", "Дней", "Расчёт", "Сумма"], rows: [[`${U.fmtDate(from)}–${U.fmtDate(end)}`, String(days), `${U.money(price)} × ${pct(k.rate)}% × ${days}`, rub(raw_total)]] },
         notes,
-        related: a.kind === "prepaid" ? [{ id: "d53", text: "Жалоба в Роспотребнадзор" }] : [{ id: a.kind.startsWith("work") ? "d04" : "d01", text: "Составить претензию" }],
+        related: a.kind === "prepaid" ? [{ id: "d53", text: "Жалоба в Роспотребнадзор" }] : a.kind.startsWith("work") ? [{ id: "d04", text: "Составить претензию", fill: { price: a.price } }] : [{ id: "d01", text: "Составить претензию", fill: { price: a.price, demand: { refund: "refund", replace: "replace_same", repair: "repair" }[a.kind] } }],
       };
     },
   };

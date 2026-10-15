@@ -149,7 +149,7 @@
         ].filter(Boolean),
         table: { head: ["Что", "Как считается", "Сумма"], rows },
         notes,
-        related: k === "divorce" || k === "split" ? [{ id: "d21", text: "Иск о расторжении брака" }] : k === "order" ? [{ id: "d35", text: "Претензия о возврате долга" }] : k === "restore" || k === "duplicate" ? [{ id: "d60", text: "Исполнительный лист" }] : [{ id: "d60", text: "Исполнительный лист после суда" }],
+        related: k === "divorce" || k === "split" ? [{ id: "d21", text: "Иск о расторжении брака" }] : k === "order" ? [{ id: "d35", text: "Претензия о возврате долга", fill: { amount: a.price } }] : k === "restore" ? [{ id: "d60", text: "Восстановить срок", fill: { route: "restore" } }] : k === "duplicate" ? [{ id: "d60", text: "Исполнительный лист" }] : [{ id: "d60", text: "Исполнительный лист после суда", fill: k === "claim" ? { what: "money", sum: a.price } : null }],
       };
     },
   };

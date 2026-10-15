@@ -99,7 +99,7 @@
         reminders.push({ date: d, title: "Заплатить налог самозанятого за прошлый месяц", text: "Сумма — в приложении «Мой налог»." });
       } else if (!company) reminders.push({ date: decl, title: "Подать декларацию 3-НДФЛ — доход от сдачи квартиры" }, { date: payBy, title: `Заплатить НДФЛ за сдачу квартиры — ${rub(ndflRent)}` });
 
-      return { summary, table, notes, reminders, related: [{ id: "d12", text: "Договор найма" }] };
+      return { summary, table, notes, reminders, related: [{ id: "d12", text: "Договор найма", fill: { rent: a.rent } }] };
     },
   };
 

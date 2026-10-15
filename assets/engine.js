@@ -197,6 +197,17 @@
     const state = { a: Object.assign({}, spec.defaults || {}), step: 0, touched: {}, done: false, notes: {} };
     const allIds = new Set(spec.steps.flatMap(s => s.questions.map(q => q.id)));
     const SG = global.Suggest || null;
+    // данные из калькулятора (assets/calc.js → sessionStorage, живут 30 минут и только в этой вкладке)
+    try {
+      const raw = global.sessionStorage && global.sessionStorage.getItem("yp-prefill");
+      const p = raw ? JSON.parse(raw) : null;
+      if (p && p.to === spec.id && Date.now() - p.at < 30 * 60 * 1000) {
+        const got = Object.keys(p.a || {}).filter(k => allIds.has(k));
+        got.forEach(k => { state.a[k] = p.a[k]; });
+        if (got.length) { prune(spec, state.a); state.prefill = { from: p.from, ids: got.filter(k => k in state.a) }; }
+      }
+      if (p) global.sessionStorage.removeItem("yp-prefill");
+    } catch (e) { /* нет хранилища — начинаем с пустой анкеты */ }
 
     const $form = h("section", { class: "wiz" });
     const $preview = h("section", { class: "preview", "aria-label": "Предпросмотр документа" });
@@ -284,6 +295,10 @@
                 oninput: e => { const arr = live(); const raw = e.target.value; arr[i] = Object.assign({}, arr[i], { [c.id]: raw === "" ? undefined : num ? Number(raw) : raw }); renderPreview(); },
               }));
               inp.value = row[c.id] ?? "";
+              // подсказки адресов и в таблицах (например, адреса наследников)
+              const ck = SG && !num && c.type !== "date" ? SG.classify({ id: c.id, type: "text", suggest: c.suggest }, c.label) : null;
+              if (ck === "address" && SG.enabled()) return SG.attach(inp, { kind: ck, q: { id: c.id }, has: () => false,
+                apply: (vals) => { const arr = live(); arr[i] = Object.assign({}, arr[i], { [c.id]: vals[c.id] }); state.touched[q.id] = true; renderPreview(); } }, h);
               return inp;
             }),
             h("button", { type: "button", class: "rows-x", "aria-label": `Удалить строку ${i + 1}`, title: "Удалить строку",
@@ -295,7 +310,7 @@
         control = h("textarea", {
           id, rows: 4, placeholder: (typeof q.placeholder === "function" ? q.placeholder(state.a, d) : q.placeholder) || "",
           oninput: e => { state.a[q.id] = e.target.value; if (!e.target.value) delete state.a[q.id]; renderPreview(); },
-          onblur: () => { state.touched[q.id] = true; prune(spec, state.a); renderForm(false); renderPreview(); },
+          onblur: () => { state.touched[q.id] = true; prune(spec, state.a); soon(); renderPreview(); },
         });
         control.value = v || "";
       } else {
@@ -312,7 +327,7 @@
             if (raw === "") delete state.a[q.id];
             renderPreview();
           },
-          onchange: () => { state.touched[q.id] = true; prune(spec, state.a); renderForm(false); renderPreview(); },
+          onchange: () => { state.touched[q.id] = true; prune(spec, state.a); soon(); renderPreview(); },
         });
         control.value = v ?? "";
       }
@@ -362,9 +377,27 @@
       return h("div", { class: "stop" + (stop.soft ? " soft" : ""), role: "status" }, h("strong", {}, stop.title), h("p", {}, stop.text), acts.length ? h("div", { class: "stop-acts" }, acts) : null);
     }
 
+    // Перерисовка после ухода из поля — отложенная: сначала фокус переходит в поле, куда кликнули,
+    // и только потом форма перерисовывается (иначе клик и первые символы в новом поле терялись).
+    // Пока кнопка мыши нажата, ждём её отпускания — чтобы не сорвать клик по варианту ответа или кнопке.
+    let soonT = null, pointer = false, pending = false;
+    function soon() {
+      clearTimeout(soonT);
+      soonT = setTimeout(() => { if (pointer) { pending = true; return; } renderForm(false); }, 0);
+    }
+    $form.addEventListener("pointerdown", () => { pointer = true; }, true);
+    global.addEventListener && global.addEventListener("pointerup", () => {
+      pointer = false;
+      if (pending) { pending = false; setTimeout(() => renderForm(false), 0); }
+    }, true);
+
     function renderForm(focusTop) {
+      clearTimeout(soonT); pending = false;
       const a = state.a, d = spec.derive(a);
-      const active = document.activeElement && document.activeElement.id;
+      const ae = document.activeElement;
+      const active = ae && ae.id;
+      let sel = null;
+      try { sel = ae && typeof ae.selectionStart === "number" ? [ae.selectionStart, ae.selectionEnd] : null; } catch (e) { sel = null; }
       $form.textContent = "";
 
       if (state.done) { renderDone(d); return; }
@@ -376,7 +409,11 @@
       const errs = stepErrors(spec, step, a);
       const stop = spec.stop ? spec.stop(a, d) : null;
 
+      const pf = state.prefill && state.step === 0 ? state.prefill : null;
+      const pfLabels = pf ? spec.steps.flatMap(s => s.questions).filter(q => pf.ids.includes(q.id)).map(q => { const l = typeof q.label === "function" ? q.label(a, d) : q.label; return String(l || q.id).replace(/[?:]\s*$/, "").toLowerCase(); }) : [];
       add($form,
+        pf && pfLabels.length ? h("div", { class: "prefill", role: "status" }, h("strong", {}, `Подставили из ${pf.from}: `), pfLabels.join(", ") + ". Проверьте и заполните остальное.",
+          h("button", { type: "button", class: "sg-off", onclick: () => { state.prefill = null; renderForm(false); } }, "скрыть")) : null,
         h("ol", { class: "steps", "aria-label": "Шаги" },
           steps.map((s, i) => h("li", { class: i === state.step ? "cur" : i < state.step ? "past" : "" },
             h("span", { class: "n" }, String(i + 1)), h("span", { class: "t" }, typeof s.title === "function" ? s.title(a, d) : s.title)))),
@@ -403,7 +440,7 @@
             },
           }, state.step < steps.length - 1 ? "Далее" : "Собрать документ")));
 
-      if (active) { const el = document.getElementById(active); if (el) el.focus(); }
+      if (active) { const el = document.getElementById(active); if (el) { el.focus(); try { if (sel) el.setSelectionRange(sel[0], sel[1]); } catch (e) { /* дата и число не дают ставить курсор */ } } }
       if (focusTop) $form.scrollIntoView({ block: "start", behavior: "smooth" });
     }
 
