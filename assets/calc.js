@@ -82,7 +82,7 @@
       const nb = x => String(x).replace(/ ₽/g, "\u00a0₽");
       (r.summary || []).forEach(s => card.append(h("div", { class: "calc-row" + (s.big ? " big" : "") }, h("span", {}, s.label), h("strong", {}, nb(s.value)))));
       if (r.table && r.table.rows.length) {
-        card.append(h("div", { class: "calc-table-wrap" }, h("table", { class: "calc-table" },
+        card.append(h("div", { class: "calc-table-wrap" }, h("table", { class: "calc-table" + (r.table.text ? " text" : "") },
           h("thead", {}, h("tr", {}, r.table.head.map(x => h("th", {}, x)))),
           h("tbody", {}, r.table.rows.map(row => h("tr", {}, row.map(x => h("td", {}, nb(x)))))))));
       }

@@ -234,3 +234,17 @@ footer.site { border-top: 1px solid var(--line); padding-block: 20px 32px; color
 .prefill { margin: 0 0 14px; background: var(--accent-soft); border-left: 3px solid var(--accent); padding: 10px 14px; border-radius: 0 8px 8px 0; font-size: 14px; }
 .prefill .sg-off { margin-left: 8px; }
 .rows-r .sg { min-width: 0; }
+.calc-table td { white-space: pre-line; }
+@media (max-width: 520px) {
+  .calc-row.big { flex-wrap: wrap; gap: 4px 16px; }
+  .calc-row.big strong { text-align: left; }
+}
+.calc-table.text td:last-child, .calc-table.text th:last-child { white-space: pre-line; text-align: left; }
+.calc-table.text td:nth-child(2) { white-space: nowrap; }
+@media (max-width: 520px) {
+  .calc-table.text thead { display: none; }
+  .calc-table.text tr { display: grid; grid-template-columns: 1fr auto; border-bottom: 1px solid var(--line); padding: 6px 0; }
+  .calc-table.text td { border: 0; padding: 2px 8px; }
+  .calc-table.text td:first-child { font-weight: 600; }
+  .calc-table.text td:last-child { grid-column: 1 / -1; color: var(--muted); }
+}

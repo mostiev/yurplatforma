@@ -30,4 +30,5 @@ t("К-7 → Д-60 и Д-35", () => { check("k7", { kind: "claim", price: 200000 
 t("К-8 → Д-61, после срока ещё и Д-84", () => { check("k8", { death_date: "2026-09-01" }, "d61", { death_date: "2026-09-01" }); check("k8", { death_date: "2025-01-10" }, "d84", { death_date: "2025-01-10" }); });
 t("К-9 → Д-57: отпуск", () => check("k9", { mode: "vacation", start: "2026-11-02", days: 14, pay: 100000 }, "d57", { kind: "annual", start_date: "2026-11-02", days: 14 }));
 t("К-13 → Д-12, К-15 → Д-82", () => { check("k13", { rent: 50000, months: 12 }, "d12", { rent: 50000 }); check("k15", { price: 9000000, cad: 7000000 }, "d82", { price: 9000000, cad_value: 7000000 }); });
+t("К-16 → Д-87: прекращение долга при гибели", () => check("k16", { event: "death", heirs: 2 }, "d87", { kind: "end", death_kind: "died" }));
 console.log(`\n${n} проверок пройдено`);

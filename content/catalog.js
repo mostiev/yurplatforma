@@ -109,6 +109,8 @@ window.CATALOG = {
     {"id": "d65", "code": "Д-65", "title": "Вернуть долг по расписке: судебный приказ или иск", "section": "debts", "kind": "doc", "live": true},
     {"id": "d66", "code": "Д-66", "title": "Мошенники: заявление в банк и в полицию", "section": "banks", "kind": "doc", "live": true},
     {"id": "d87", "code": "Д-87", "title": "Кредиты участника СВО: каникулы и списание долга", "section": "military", "kind": "doc", "live": true},
-    {"id": "d88", "code": "Д-88", "title": "Приставы: приостановить взыскание на время СВО", "section": "military", "kind": "doc", "live": true}
+    {"id": "d88", "code": "Д-88", "title": "Приставы: приостановить взыскание на время СВО", "section": "military", "kind": "doc", "live": true},
+    {"id": "d89", "code": "Д-89", "title": "Пропал без вести на СВО: заявление в суд", "section": "military", "kind": "doc", "live": true},
+    {"id": "k16", "code": "К-16", "title": "Какие выплаты положены участнику СВО и семье", "section": "military", "kind": "calc", "live": true}
   ]
 };
