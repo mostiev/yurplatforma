@@ -218,3 +218,16 @@ footer.site { border-top: 1px solid var(--line); padding-block: 20px 32px; color
 .stop.soft { background: var(--accent-soft); border-left-color: var(--accent); }
 .stop-acts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
 .stop p { margin: 6px 0 0; }
+
+/* подсказки при вводе (assets/suggest.js) */
+.sg { position: relative; }
+.sg-list { position: absolute; z-index: 20; left: 0; right: 0; top: calc(100% + 4px); margin: 0; padding: 4px 0; list-style: none; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: 0 8px 24px rgba(0, 0, 0, .12); max-height: 320px; overflow-y: auto; }
+.sg-list li[role="option"] { padding: 8px 12px; cursor: pointer; display: flex; flex-direction: column; gap: 2px; }
+.sg-list li[role="option"].on, .sg-list li[role="option"]:hover { background: var(--accent-soft); }
+.sg-m { font-size: 15px; }
+.sg-s { font-size: 13px; color: var(--muted); }
+.sg-foot { display: flex; justify-content: space-between; align-items: center; padding: 6px 12px 4px; border-top: 1px solid var(--line); margin-top: 4px; font-size: 12px; color: var(--muted); }
+.sg-foot a { color: var(--muted); }
+.sg-off, .sg-on { font: inherit; font-size: 12px; background: none; border: 0; padding: 0; color: var(--muted); text-decoration: underline; cursor: pointer; }
+.sg-on { margin-top: 6px; }
+.field-w { margin: 6px 0 0; font-size: 14px; background: var(--warn-bg); border-left: 3px solid var(--warn-line); padding: 4px 10px; border-radius: 0 6px 6px 0; }

@@ -2,7 +2,8 @@
  * Движок документов.
  * Каждый документ описан спецификацией в content/<id>.js (см. content/README.md).
  * Движок рисует анкету по шагам, показывает живой предпросмотр
- * и собирает .docx прямо в браузере. На сервер ничего не отправляется.
+ * и собирает .docx прямо в браузере. На сервер ничего не отправляется — кроме текста полей адреса, суда, банка
+ * и ИНН организации для подсказок (assets/suggest.js), если подсказки подключены и не выключены.
  */
 (function (global) {
   "use strict";
@@ -193,7 +194,9 @@
 
   function mount(root, spec) {
     // spec.defaults — ответы, заданные заранее (например, вариант документа для отдельной страницы каталога)
-    const state = { a: Object.assign({}, spec.defaults || {}), step: 0, touched: {}, done: false };
+    const state = { a: Object.assign({}, spec.defaults || {}), step: 0, touched: {}, done: false, notes: {} };
+    const allIds = new Set(spec.steps.flatMap(s => s.questions.map(q => q.id)));
+    const SG = global.Suggest || null;
 
     const $form = h("section", { class: "wiz" });
     const $preview = h("section", { class: "preview", "aria-label": "Предпросмотр документа" });
@@ -314,12 +317,38 @@
         control.value = v ?? "";
       }
 
+      // подсказки адресов, судов, банков, организаций (assets/suggest.js) и проверки без сети
+      const labelText = typeof q.label === "function" ? q.label(state.a, d) : q.label;
+      const sgKind = SG && control.tagName === "INPUT" && control.type === "text" ? SG.classify(q, labelText) : null;
+      let sgExtra = null;
+      if (sgKind && SG.enabled()) {
+        const pre = q.id.replace(/inn$/, "");
+        control = SG.attach(control, {
+          kind: sgKind, q, ip: state.a[pre + "kind"] === "ip",
+          has: k => allIds.has(k),
+          onToggle: () => renderForm(false),
+          apply: (vals, final, item) => {
+            Object.entries(vals).forEach(([k, x]) => { if (x === undefined || x === null || x === "") return; state.a[k] = x; if (final) state.touched[k] = true; });
+            delete state.notes[q.id];
+            const st = item && item.data && item.data.state && item.data.state.status;
+            if (sgKind === "party" && st && st !== "ACTIVE") state.notes[q.id] = `Внимание: по данным ЕГРЮЛ организация — ${SG.status(st)}. Проверьте выписку на egrul.nalog.ru.`;
+            if (final) { prune(spec, state.a); renderForm(false); }
+            renderPreview();
+          },
+        }, h);
+      } else if (sgKind && SG.token) {
+        sgExtra = h("button", { type: "button", class: "sg-on", onclick: () => { SG.setEnabled(true); renderForm(false); } }, "Включить подсказки");
+      }
+      const warn = state.notes[q.id] || (sgKind && state.touched[q.id] && !err ? SG.offlineHint(sgKind, v) : null);
+
       return h("div", { class: "field" + (err ? " has-err" : ""), "data-q": q.id },
         h("label", { class: "field-l", id: id + "-l", for: q.type === "choice" || q.type === "rows" ? null : id }, typeof q.label === "function" ? q.label(state.a, d) : q.label,
           (typeof q.required === "function" ? !q.required(state.a, d) : q.required === false) ? h("span", { class: "opt" }, " — необязательно") : null),
         (() => { const t = typeof q.hint === "function" ? q.hint(state.a, d) : q.hint; return t ? h("p", { class: "field-h" }, t) : null; })(),
         q.suffix ? h("div", { class: "with-suffix" }, control, h("span", { class: "suffix" }, q.suffix)) : control,
-        err ? h("p", { class: "field-e", role: "alert" }, err) : null);
+        err ? h("p", { class: "field-e", role: "alert" }, err) : null,
+        warn ? h("p", { class: "field-w", role: "status" }, warn) : null,
+        sgExtra);
     }
 
     // стоп — не тупик: ссылка на другой документ (link), кнопка, меняющая ответ (action), или мягкое предупреждение (soft)

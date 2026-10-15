@@ -10,4 +10,7 @@
     (spec.status === "draft" ? '<div class="draft">Черновик: ' + (calcId ? "расчёт" : "документ") + ' ещё не проверен юристом</div>' : "");
   if (calcId) Calc.mount(document.getElementById("app"), spec);
   else Engine.mount(document.getElementById("app"), spec);
+  // честно говорим, что уходит в сервис подсказок, если он подключён
+  var foot = document.querySelector("footer.site");
+  if (!calcId && foot && window.Suggest && window.Suggest.token) foot.appendChild(document.createTextNode(" Исключение — подсказки адресов, судов, банков и организаций: текст этих полей (и ИНН организации) уходит в сервис DaData, чтобы показать варианты. ФИО, паспорт и ИНН граждан не отправляются. Подсказки можно выключить в выпадающем списке."));
 })();
