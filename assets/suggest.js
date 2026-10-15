@@ -14,7 +14,7 @@
   "use strict";
 
   // Ключ API из личного кабинета dadata.ru (раздел «API-ключи», ключ для подсказок; секретный ключ сюда НЕ вставлять)
-  const TOKEN = "";
+  const TOKEN = "9a1ce443f33eddf45545d74eba413407fc4c3415";
   const URL = "https://suggestions.dadata.ru/suggestions/api/4_1/rs/suggest/";
   const KEY = "yp-suggest";
 
