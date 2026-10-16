@@ -516,6 +516,7 @@
             },
           }, "Скачать .docx"),
           copyBtn,
+          h("button", { class: "btn ghost", type: "button", onclick: () => global.print() }, "Печать или PDF"),
           h("button", { class: "btn ghost", type: "button", onclick: () => { state.done = false; state.step = spec.steps.filter(s => !s.show || s.show(state.a, spec.derive(state.a))).length - 1; renderForm(true); } }, "Изменить ответы")),
         (() => {
           const mine = PROFILE_KEYS.filter(k => allIds.has(k) && a[k]);

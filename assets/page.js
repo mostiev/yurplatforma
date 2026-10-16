@@ -10,6 +10,15 @@
     (spec.status === "draft" ? '<div class="draft">Черновик: ' + (calcId ? "расчёт" : "документ") + ' ещё не проверен юристом</div>' : "");
   if (calcId) Calc.mount(document.getElementById("app"), spec);
   else Engine.mount(document.getElementById("app"), spec);
+  // «Нашли ошибку?» — контакт для обратной связи (почта или ссылка на Telegram). Пусто — кнопка не показывается
+  var FEEDBACK = "";
+  var footEl = document.querySelector("footer.site");
+  if (FEEDBACK && footEl) {
+    var href = FEEDBACK.indexOf("@") > 0 && FEEDBACK.indexOf("/") < 0 ? "mailto:" + FEEDBACK + "?subject=" + encodeURIComponent("Ошибка: " + spec.code + " " + spec.title) : FEEDBACK;
+    var a = document.createElement("a"); a.href = href; a.textContent = "Нашли ошибку или неточность? Напишите нам"; a.className = "feedback";
+    if (href.indexOf("http") === 0) { a.target = "_blank"; a.rel = "noopener noreferrer"; }
+    footEl.appendChild(document.createElement("br")); footEl.appendChild(a);
+  }
   // честно говорим, что уходит в сервис подсказок, если он подключён
   var foot = document.querySelector("footer.site");
   if (!calcId && foot && window.Suggest && window.Suggest.token) foot.appendChild(document.createTextNode(" Исключение — подсказки адресов, судов, банков и организаций: текст этих полей (и ИНН организации) уходит в сервис DaData, чтобы показать варианты. ФИО, паспорт и ИНН граждан не отправляются. Подсказки можно выключить в выпадающем списке."));
