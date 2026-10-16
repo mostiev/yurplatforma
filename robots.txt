@@ -1,2 +1,3 @@
 User-agent: *
 Allow: /
+Sitemap: https://yurplatform.ru/sitemap.xml
