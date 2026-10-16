@@ -265,3 +265,6 @@ footer.site { border-top: 1px solid var(--line); padding-block: 20px 32px; color
   .gap { background: none; color: #555; border-bottom: 1px solid #000; }
   .preview h2, .preview .lbl { display: none; }
 }
+.actual, .reviewed { display: inline-block; margin: 10px 8px 0 0; font-size: 13px; padding: 4px 10px; border-radius: 0 6px 6px 0; background: var(--accent-soft); border-left: 3px solid var(--accent); }
+.reviewed { font-weight: 600; }
+.sec.found { border-color: var(--accent); }
