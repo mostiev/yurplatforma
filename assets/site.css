@@ -248,3 +248,8 @@ footer.site { border-top: 1px solid var(--line); padding-block: 20px 32px; color
   .calc-table.text td:first-child { font-weight: 600; }
   .calc-table.text td:last-child { grid-column: 1 / -1; color: var(--muted); }
 }
+.mydata { margin: 10px 0 0; font-size: 14px; color: var(--muted); }
+.mydata .h { font-size: 13px; }
+.seo-about { margin: 18px 0 6px; font-size: 14px; color: var(--muted); }
+.seo-about summary { cursor: pointer; }
+.seo-about p { margin: 8px 0 0; }

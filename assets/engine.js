@@ -209,6 +209,44 @@
       if (p) global.sessionStorage.removeItem("yp-prefill");
     } catch (e) { /* нет хранилища — начинаем с пустой анкеты */ }
 
+    // Черновик и «Мои данные» — только в этом браузере (localStorage), на сервер не уходят
+    const LS = {
+      get(k) { try { const v = global.localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch (e) { return null; } },
+      set(k, v) { try { global.localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* приватный режим */ } },
+      del(k) { try { global.localStorage.removeItem(k); } catch (e) { /* ничего */ } },
+    };
+    const DRAFT = "yp-draft:" + spec.id, PROFILE = "yp-profile";
+    const PROFILE_KEYS = ["buyer_name", "buyer_birth", "buyer_address", "buyer_phone", "buyer_email"];
+    if (!state.prefill) {
+      const dr = LS.get(DRAFT);
+      if (dr && dr.a && Date.now() - dr.at < 60 * 864e5) {
+        Object.keys(dr.a).filter(k => allIds.has(k)).forEach(k => { state.a[k] = dr.a[k]; });
+        prune(spec, state.a);
+        state.step = Math.max(0, Number(dr.step) || 0);
+        state.restored = dr.at;
+      }
+    }
+    const prof = LS.get(PROFILE);
+    if (prof) {
+      const used = PROFILE_KEYS.filter(k => allIds.has(k) && prof[k] && (state.a[k] === undefined || state.a[k] === ""));
+      used.forEach(k => { state.a[k] = prof[k]; });
+      if (used.length) state.profileUsed = true;
+    }
+    let draftT = null;
+    function saveDraft() {
+      clearTimeout(draftT);
+      draftT = setTimeout(() => {
+        const own = Object.keys(state.a).filter(k => !(spec.defaults && JSON.stringify(spec.defaults[k]) === JSON.stringify(state.a[k])));
+        if (own.length) LS.set(DRAFT, { a: state.a, step: state.step, at: Date.now() });
+      }, 400);
+    }
+    function startOver() {
+      LS.del(DRAFT);
+      state.a = Object.assign({}, spec.defaults || {}); state.step = 0; state.done = false; state.touched = {};
+      state.restored = null; state.profileUsed = false; state.prefill = null;
+      renderForm(true); renderPreview();
+    }
+
     const $form = h("section", { class: "wiz" });
     const $preview = h("section", { class: "preview", "aria-label": "Предпросмотр документа" });
     root.append(h("div", { class: "doc-layout" }, $form, $preview));
@@ -393,6 +431,7 @@
 
     function renderForm(focusTop) {
       clearTimeout(soonT); pending = false;
+      saveDraft();
       const a = state.a, d = spec.derive(a);
       const ae = document.activeElement;
       const active = ae && ae.id;
@@ -411,7 +450,13 @@
 
       const pf = state.prefill && state.step === 0 ? state.prefill : null;
       const pfLabels = pf ? spec.steps.flatMap(s => s.questions).filter(q => pf.ids.includes(q.id)).map(q => { const l = typeof q.label === "function" ? q.label(a, d) : q.label; return String(l || q.id).replace(/[?:]\s*$/, "").toLowerCase(); }) : [];
+      const notes = [];
+      if (state.restored && state.step === 0) notes.push(h("div", { class: "prefill", role: "status" }, `Восстановили черновик от ${U.fmtDate(new Date(state.restored))} — он хранится только в этом браузере.`,
+        h("button", { type: "button", class: "sg-off", onclick: startOver }, "начать заново")));
+      if (state.profileUsed && state.step === 0) notes.push(h("div", { class: "prefill", role: "status" }, "Подставили ваши контакты из «Моих данных» (они хранятся только в этом браузере).",
+        h("button", { type: "button", class: "sg-off", onclick: () => { LS.del(PROFILE); state.profileUsed = false; renderForm(false); } }, "забыть")));
       add($form,
+        notes,
         pf && pfLabels.length ? h("div", { class: "prefill", role: "status" }, h("strong", {}, `Подставили из ${pf.from}: `), pfLabels.join(", ") + ". Проверьте и заполните остальное.",
           h("button", { type: "button", class: "sg-off", onclick: () => { state.prefill = null; renderForm(false); } }, "скрыть")) : null,
         h("ol", { class: "steps", "aria-label": "Шаги" },
@@ -472,6 +517,15 @@
           }, "Скачать .docx"),
           copyBtn,
           h("button", { class: "btn ghost", type: "button", onclick: () => { state.done = false; state.step = spec.steps.filter(s => !s.show || s.show(state.a, spec.derive(state.a))).length - 1; renderForm(true); } }, "Изменить ответы")),
+        (() => {
+          const mine = PROFILE_KEYS.filter(k => allIds.has(k) && a[k]);
+          if (!mine.length) return null;
+          const saved = LS.get(PROFILE) || {};
+          if (mine.every(k => saved[k] === a[k])) return h("p", { class: "mydata" }, "Контакты сохранены в «Моих данных» этого браузера — подставятся в другие документы. ", h("button", { type: "button", class: "sg-off", onclick: () => { LS.del(PROFILE); renderForm(false); } }, "забыть"));
+          const btn = h("button", { type: "button", class: "btn ghost sm", onclick: () => { const p = Object.assign({}, saved); mine.forEach(k => { p[k] = a[k]; }); LS.set(PROFILE, p); renderForm(false); } }, "Запомнить мои контакты для других документов");
+          return h("p", { class: "mydata" }, btn, h("span", { class: "h" }, " Только в этом браузере. На чужом компьютере не нажимайте."));
+        })(),
+        h("p", { class: "mydata" }, h("button", { type: "button", class: "sg-off", onclick: startOver }, "Стереть ответы и начать заново")),
         spec.reminders ? U.remindersBlock(h, spec.reminders(a, d), "Сроки — " + (spec.fileName ? spec.fileName(a, d) : spec.title)) : null,
         (() => { const st = spec.stop ? spec.stop(a, d) : null; return st && st.soft ? stopBox(st) : null; })(),
         guide.length ? h("div", { class: "guide" },
@@ -481,6 +535,7 @@
     }
 
     function renderPreview() {
+      saveDraft();
       const d = spec.derive(state.a);
       const ps = spec.render(state.a, d);
       $preview.textContent = "";
