@@ -24,9 +24,9 @@ module.exports = function load(id, base) {
   let n = 0;
   const t = (name, fn) => { fn(); n++; console.log("ok —", name); };
   const done = () => console.log(`\n${n} проверок пройдено`);
-  const writeDocx = (name, a, d) => {
+  const writeDocx = (name, a, d, ps) => {
     fs.mkdirSync(path.join(__dirname, "out"), { recursive: true });
-    fs.writeFileSync(path.join(__dirname, "out", name), Docx.buildDocx(spec.render(a, d)));
+    fs.writeFileSync(path.join(__dirname, "out", name), Docx.buildDocx(ps || spec.render(a, d)));
   };
   return { Engine, spec, U: Engine.U, C: Common, run, allErrors, t, done, writeDocx };
 };

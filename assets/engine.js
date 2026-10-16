@@ -37,6 +37,29 @@
   }
 
   const U = {
+    // опись вложения (ф. 107) по документу: сам документ + строки из «Приложения:»; адрес и ценность — от руки
+    opis(ps, title) {
+      const att = [];
+      ps.forEach(p => { if (p && typeof p.text === "string" && /^Приложения:\n/.test(p.text)) p.text.split("\n").slice(1).forEach(l => { const t = l.replace(/^\d+\.\s*/, "").replace(/\.$/, "").trim(); if (t) att.push(t); }); });
+      const items = [String(title || "Документ").replace(/\.$/, ""), ...att];
+      const P = [];
+      const copy = () => {
+        P.push({ text: "ф. 107", align: "right", after: 120 });
+        P.push({ text: "ОПИСЬ ВЛОЖЕНИЯ", align: "center", bold: true, after: 0 });
+        P.push({ text: "в ценное письмо", align: "center", after: 240 });
+        P.push({ text: "Куда: ________________________________________________________________", align: "left", after: 120 });
+        P.push({ text: "Кому: ________________________________________________________________", align: "left", after: 240 });
+        P.push({ table: { widths: [700, 5655, 1400, 1600], head: 1, rows: [
+          ["№ п/п", "Наименование предметов", "Количество предметов", "Объявленная ценность, руб."],
+          ...items.map((x, i) => [String(i + 1), x, "1", ""]),
+          ["", "Общий итог", String(items.length), ""],
+        ] } });
+        P.push({ text: "Отправитель ____________________ (подпись)", align: "left", before: 240, after: 120 });
+        P.push({ text: "Проверил ____________________ (подпись работника связи)", align: "left", after: 0 });
+      };
+      copy(); P.push({ pageBreak: true }); copy();
+      return P;
+    },
     icsText,
     // только будущие события (сегодня включительно), по дате
     upcoming(events) {
@@ -517,6 +540,14 @@
           }, "Скачать .docx"),
           copyBtn,
           h("button", { class: "btn ghost", type: "button", onclick: () => global.print() }, "Печать или PDF"),
+          h("button", { class: "btn ghost", type: "button", title: "Для заказного письма с описью: распечатайте два экземпляра, ценность впишите от руки", onclick: () => {
+            const bytes = Docx.buildDocx(U.opis(ps, spec.fileName ? spec.fileName(a, d) : spec.title));
+            const blob = new Blob([bytes], { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
+            const url = URL.createObjectURL(blob);
+            const link = h("a", { href: url, download: "Опись вложения — " + (spec.fileName ? spec.fileName(a, d) : spec.id) + ".docx" });
+            document.body.append(link); link.click(); link.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 4000);
+          } }, "Опись вложения (ф. 107)"),
           h("button", { class: "btn ghost", type: "button", onclick: () => { state.done = false; state.step = spec.steps.filter(s => !s.show || s.show(state.a, spec.derive(state.a))).length - 1; renderForm(true); } }, "Изменить ответы")),
         (() => {
           const mine = PROFILE_KEYS.filter(k => allIds.has(k) && a[k]);
