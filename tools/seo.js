@@ -55,7 +55,11 @@ for (const rel of ["index.html", "chto-delat.html", "proverka.html", "usloviya.h
     .replace(/<link rel="preconnect" href="https:\/\/fonts\.googleapis\.com">\n/g, "")
     .replace(/<link rel="stylesheet" href="https:\/\/fonts\.googleapis\.com[^>]*>\n/g, "");
   html = put(html, "icon", `<link rel="icon" href="${up}favicon.svg" type="image/svg+xml">\n`, (h, b) => h.replace(/(<link rel="stylesheet")/, b + "$1"));
-  html = put(html, "legal", `<nav class="legal"><a href="${up}usloviya.html">Условия использования</a> · <a href="${up}privacy.html">Политика конфиденциальности</a></nav>`, (h, b) => h.replace(/<\/footer>/, b + "</footer>"));
+  // единое меню в шапке: три раздела, текущий отмечен
+  const NAV = [["index.html", "Все документы"], ["chto-delat.html", "Что делать, если…"], ["proverka.html", "Проверь себя"]];
+  html = html.replace(/(<header class="top">[\s\S]*?)<nav[^>]*>[\s\S]*?<\/nav>/, (m, pre) => pre + `<nav aria-label="Разделы">` +
+    NAV.map(([h, t]) => `<a href="${up}${h}"${rel === h ? ' aria-current="page"' : ""}>${t}</a>`).join("") + `</nav>`);
+  html = put(html, "legal",`<nav class="legal"><a href="${up}usloviya.html">Условия использования</a> · <a href="${up}privacy.html">Политика конфиденциальности</a></nav>`, (h, b) => h.replace(/<\/footer>/, b + "</footer>"));
   fs.writeFileSync(file, html);
 }
 const urls = ["index.html", "chto-delat.html", "proverka.html", "usloviya.html", "privacy.html"];
