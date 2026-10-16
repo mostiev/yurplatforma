@@ -30,10 +30,9 @@ a:hover { color: var(--accent-hover); }
 .wrap { max-width: 1160px; margin: 0 auto; }
 
 .top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 24px; padding-block: 18px; border-bottom: 1px solid var(--line); }
-.logo { display: inline-flex; align-items: center; gap: 0; font-weight: 700; letter-spacing: -.02em; color: var(--accent); text-decoration: none; font-size: 20px; }
+.logo { display: inline-flex; align-items: center; gap: 0; font-weight: 700; letter-spacing: -.02em; color: var(--accent); text-decoration: none; font-size: 22px; }
 .logo:hover { color: var(--accent); }
 .logo span { color: var(--ink); }
-.logo::before { content: "§"; flex: none; margin-right: 10px; width: 34px; height: 34px; border-radius: 9px; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; font: 700 22px/1 Georgia, "Times New Roman", serif; letter-spacing: 0; }
 .top nav { display: flex; flex-wrap: wrap; gap: 6px 24px; font-size: 15px; font-weight: 500; color: var(--muted); }
 .top nav a { color: var(--ink); text-decoration: none; padding-block: 4px; }
 .top nav a:hover { color: var(--accent); }
