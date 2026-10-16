@@ -559,6 +559,20 @@
         })(),
         h("p", { class: "mydata" }, h("button", { type: "button", class: "sg-off", onclick: startOver }, "Стереть ответы и начать заново")),
         spec.reminders ? U.remindersBlock(h, spec.reminders(a, d), "Сроки — " + (spec.fileName ? spec.fileName(a, d) : spec.title)) : null,
+        // следующий шаг цепочки: spec.next(a, d) → [{ id, text, when?, fill }] — ответы переносятся в следующий документ (только эта вкладка)
+        (() => {
+          const nx = spec.next ? (spec.next(a, d) || []).filter(Boolean) : [];
+          if (!nx.length) return null;
+          const go = x => () => {
+            if (!x.fill) return;
+            const fill = {};
+            Object.entries(x.fill).forEach(([k, v]) => { if (v !== undefined && v !== null && v !== "" && !(Array.isArray(v) && !v.length)) fill[k] = v; });
+            try { global.sessionStorage.setItem("yp-prefill", JSON.stringify({ to: x.id, from: spec.code, at: Date.now(), a: fill })); } catch (e) { /* без хранилища — просто откроется документ */ }
+          };
+          return h("div", { class: "next-steps" }, h("h3", {}, "Следующий шаг"),
+            h("ul", {}, nx.map(x => h("li", {}, x.when ? h("span", { class: "h" }, x.when + ": ") : null,
+              h("a", { href: x.id + ".html", onclick: go(x) }, x.text + (x.fill ? " — с вашими ответами" : ""))))));
+        })(),
         (() => { const st = spec.stop ? spec.stop(a, d) : null; return st && st.soft ? stopBox(st) : null; })(),
         guide.length ? h("div", { class: "guide" },
           h("h3", {}, "Что делать дальше"),

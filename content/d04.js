@@ -202,6 +202,15 @@
       return g;
     },
 
+    next(a, d) {
+      return [
+        { when: "Исполнитель не ответил за 10 дней", id: "k1", text: "Посчитать неустойку 3% в день" },
+        { when: "Отказал или молчит", id: "d53", text: "Жалоба в Роспотребнадзор", fill: { seller: a.executor_name, seller_address: a.executor_address, buy_date: a.contract_date, violations: ["quality", "claim"],
+          desc: [a.service_desc && `Заказал(а) услугу (работу): ${String(a.service_desc).trim().replace(/\.$/, "")}.`, a.defect && `Недостатки: ${String(a.defect).trim().replace(/\.$/, "")}.`, "Направил(а) исполнителю претензию, требование не удовлетворено."].filter(Boolean).join(" "),
+          buyer_name: a.buyer_name, buyer_address: a.buyer_address, buyer_phone: a.buyer_phone, buyer_email: a.buyer_email } },
+      ];
+    },
+
     fileName(a) { return "Претензия о недостатках работы" + (a.buyer_name ? " — " + U.shortName(a.buyer_name) : ""); },
   };
 

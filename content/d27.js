@@ -122,6 +122,10 @@
       return g;
     },
 
+    next(a, d) {
+      return [{ when: "Не заплатили и после претензии", id: "d26", text: "Жалоба в трудовую инспекцию", fill: { org_name: a.org_name, org_address: a.org_address, position: a.position, violations: ["salary"] } }];
+    },
+
     fileName(a) { return "Претензия о задержке зарплаты" + (a.buyer_name ? " — " + U.shortName(a.buyer_name) : ""); },
   };
 

@@ -268,3 +268,8 @@ footer.site { border-top: 1px solid var(--line); padding-block: 20px 32px; color
 .actual, .reviewed { display: inline-block; margin: 10px 8px 0 0; font-size: 13px; padding: 4px 10px; border-radius: 0 6px 6px 0; background: var(--accent-soft); border-left: 3px solid var(--accent); }
 .reviewed { font-weight: 600; }
 .sec.found { border-color: var(--accent); }
+.next-steps { margin-top: 16px; padding: 12px 14px; border: 1px solid var(--accent); border-radius: var(--radius); }
+.next-steps h3 { margin: 0 0 6px; font-size: 16px; }
+.next-steps ul { margin: 0; padding-left: 18px; }
+.next-steps li { margin: 6px 0; }
+.next-steps .h { color: var(--muted); }

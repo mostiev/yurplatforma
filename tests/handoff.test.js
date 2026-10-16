@@ -31,4 +31,31 @@ t("К-8 → Д-61, после срока ещё и Д-84", () => { check("k8", {
 t("К-9 → Д-57: отпуск", () => check("k9", { mode: "vacation", start: "2026-11-02", days: 14, pay: 100000 }, "d57", { kind: "annual", start_date: "2026-11-02", days: 14 }));
 t("К-13 → Д-12, К-15 → Д-82", () => { check("k13", { rent: 50000, months: 12 }, "d12", { rent: 50000 }); check("k15", { price: 9000000, cad: 7000000 }, "d82", { price: 9000000, cad_value: 7000000 }); });
 t("К-16 → Д-87: прекращение долга при гибели", () => check("k16", { event: "death", heirs: 2 }, "d87", { kind: "end", death_kind: "died" }));
+// цепочки документов: spec.next(a, d) — поля есть в следующем документе и проходят его проверку
+t("цепочки документов (spec.next): поля и значения подходят следующему документу", () => {
+  const BASES = { d62: "k11" };
+  const fake = q => q.type === "money" || q.type === "number" ? 10000 : q.type === "date" ? "2026-01-10" : q.type === "multi" ? [q.options[0].value] : q.options ? undefined : q.type === "email" ? "a@b.ru" : q.type === "tel" ? "+7 900 000-00-00" : "Тест";
+  let checked = 0;
+  for (const id of ["d01", "d04", "d35", "d27", "d23", "d51", "d60", "d65"]) {
+    const S = doc(id);
+    const a = Object.assign({}, S.spec.defaults || {});
+    S.spec.steps.flatMap(s => s.questions).forEach(q => { if (a[q.id] === undefined) { const v = fake(q); if (v !== undefined) a[q.id] = v; else if (q.options) a[q.id] = q.options[0].value; } });
+    const r = S.run(a);
+    const nx = (S.spec.next(r.a, r.d) || []).filter(x => x && x.fill);
+    assert(nx.length, `${id}: нет шагов с данными`);
+    for (const x of nx) {
+      const T = docs[x.id + "|"] || (docs[x.id + "|"] = loadDoc(x.id, BASES[x.id]));
+      const ids = new Set(T.spec.steps.flatMap(s => s.questions.map(q => q.id)));
+      const fill = Object.fromEntries(Object.entries(x.fill).filter(([, v]) => v !== undefined && v !== null && v !== "" && !(Array.isArray(v) && !v.length)));
+      Object.keys(fill).forEach(k => assert(ids.has(k), `${id} → ${x.id}: нет поля ${k}`));
+      const res = T.run(fill);
+      Object.keys(fill).forEach(k => {
+        const q = T.spec.steps.flatMap(s => s.questions).find(z => z.id === k && (!z.show || z.show(res.a, res.d)));
+        if (q) assert.equal(T.Engine.validateQuestion(q, res.a, res.d), null, `${id} → ${x.id}.${k} = ${JSON.stringify(fill[k])}`);
+      });
+      checked++;
+    }
+  }
+  assert(checked >= 9);
+});
 console.log(`\n${n} проверок пройдено`);

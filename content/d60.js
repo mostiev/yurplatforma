@@ -332,6 +332,12 @@
 
     reminders(a, d) { return [d.deadline && !d.expired && a.route !== "court" && { date: U.addDays(d.deadline, -30), title: "Через месяц истекает срок предъявления исполнительного листа", text: `Последний день — ${U.fmtDate(d.deadline)} (ст. 21 закона № 229-ФЗ).` }, d.early && { date: U.addMonths(U.date(a.return_date), 6), title: "Можно снова предъявить лист приставу", text: "Через 6 месяцев после возврата из-за отсутствия имущества (ч. 4 ст. 46 закона № 229-ФЗ)." }].filter(Boolean); },
 
+    next(a, d) {
+      if (a.route !== "fssp") return [];
+      return [{ when: "Если пристав бездействует больше 2 месяцев", id: "d41", text: "Жалоба на судебного пристава", fill: { role: "creditor", debtor_name: a.debtor_name, osp: a.osp, osp_address: a.osp_address,
+        buyer_name: a.buyer_name, buyer_birth: a.buyer_birth, buyer_address: a.buyer_address, buyer_phone: a.buyer_phone, buyer_email: a.buyer_email } }];
+    },
+
     fileName(a) {
       return { court: "Заявление о выдаче исполнительного листа", fssp: "Заявление о возбуждении исполнительного производства", bank: "Заявление в банк по исполнительному листу", employer: "Заявление работодателю по исполнительному листу", restore: "Заявление о восстановлении срока предъявления исполнительного листа" }[a.route] || "Исполнительный лист";
     },

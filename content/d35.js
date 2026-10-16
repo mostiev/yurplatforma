@@ -221,6 +221,15 @@
       return g;
     },
 
+    next(a, d) {
+      return [
+        { when: "Не вернул после претензии", id: "d65", text: "Судебный приказ или иск о возврате долга", fill: { basis: a.basis === "receipt" || a.basis === "contract" ? a.basis : "none", loan_date: a.given_date, amount: a.amount,
+          due_type: a.term === "demand" ? "demand" : "date", due_date: a.term === "demand" ? null : a.due_date, debtor_name: a.debtor_name, debtor_address: a.debtor_address,
+          buyer_name: a.buyer_name, buyer_address: a.buyer_address, buyer_phone: a.buyer_phone } },
+        { id: "k3", text: "Посчитать проценты по ст. 395 ГК" },
+      ];
+    },
+
     fileName(a) { return "Претензия о возврате долга" + (a.debtor_name ? " — " + U.shortName(a.debtor_name) : ""); },
   };
 

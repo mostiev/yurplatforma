@@ -142,6 +142,14 @@
       return g;
     },
 
+    next(a, d) {
+      const p = { buyer_name: a.p_name, buyer_address: a.p_address, buyer_phone: a.p_phone, debtor_name: a.d_name, debtor_birth: a.d_birth, debtor_address: a.d_address };
+      return [
+        { when: "Когда суд вынесет приказ или решение", id: "d60", text: "Подать исполнительный документ приставам или работодателю", fill: Object.assign({ what: "alimony", doc_kind: a.kind === "order" ? "order" : "list", court: a.court }, p) },
+        { when: "Если не платит", id: "d62", text: "Долг по алиментам и неустойка", fill: Object.assign({ basis_court: a.court }, p) },
+      ];
+    },
+
     fileName(a) { return (a.kind === "order" ? "Заявление о судебном приказе на алименты" : "Иск о взыскании алиментов в твёрдой сумме") + (a.p_name ? " — " + U.shortName(a.p_name) : ""); },
   };
 

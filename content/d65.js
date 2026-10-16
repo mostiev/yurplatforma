@@ -233,6 +233,11 @@
       return g;
     },
 
+    next(a, d) {
+      return [{ when: "Когда получите приказ или решение", id: "d60", text: "Подать исполнительный документ приставам или в банк", fill: { what: "money", sum: a.amount, debtor_type: "person", debtor_name: a.debtor_name, debtor_birth: a.debtor_birth,
+        debtor_address: a.debtor_address, buyer_name: a.buyer_name, buyer_birth: a.buyer_birth, buyer_address: a.buyer_address, buyer_phone: a.buyer_phone, court: a.court } }];
+    },
+
     fileName(a) { return "Долг по расписке — " + (a.cancelled === "yes" ? "иск" : "судебный приказ или иск") + (a.debtor_name ? " — " + U.shortName(a.debtor_name) : ""); },
   };
 

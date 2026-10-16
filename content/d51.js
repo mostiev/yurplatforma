@@ -139,6 +139,10 @@
 
     reminders(a, d) { return [{ date: d.answerDue, title: "Страховщик должен ответить на претензию", text: "Если ответа нет или он не устраивает — обращение к финансовому уполномоченному." }]; },
 
+    next(a, d) {
+      return [{ when: "Если страховка не покрыла весь ущерб", id: "d63", text: "Взыскать разницу с виновника ДТП", fill: { situation: "paid", insurer: a.insurer, paid: a.paid } }];
+    },
+
     fileName(a) { return "Претензия ОСАГО" + (a.insurer ? " — " + String(a.insurer).replace(/[«»"]/g, "").slice(0, 30) : ""); },
   };
 

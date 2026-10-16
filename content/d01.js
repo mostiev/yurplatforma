@@ -246,6 +246,15 @@
       return g;
     },
 
+    next(a, d) {
+      const who = { buyer_name: a.buyer_name, buyer_address: a.buyer_address, buyer_phone: a.buyer_phone, buyer_email: a.buyer_email };
+      return [
+        { when: "Продавец не ответил за 10 дней", id: "k1", text: "Посчитать неустойку 1% в день" },
+        { when: "Отказал или молчит", id: "d53", text: "Жалоба в Роспотребнадзор", fill: Object.assign({ seller: a.seller_name, seller_address: a.seller_address, buy_date: a.received_date,
+          violations: [a.demand === "refund" ? "refund" : "quality", "claim"], desc: [a.product && `Купил(а) ${String(a.product).trim()}.`, a.defect && `Недостаток: ${String(a.defect).trim().replace(/\.$/, "")}.`, "Направил(а) продавцу претензию, требование не удовлетворено."].filter(Boolean).join(" ") }, who) },
+      ];
+    },
+
     fileName(a) { return "Претензия о недостатке товара" + (a.buyer_name ? " — " + U.shortName(a.buyer_name) : ""); },
   };
 
