@@ -279,3 +279,6 @@ footer.site { border-top: 1px solid var(--line); padding-block: 20px 32px; color
 .legal-page h2 { font-size: 20px; margin: 28px 0 8px; }
 .legal-page p, .legal-page li { line-height: 1.6; }
 .legal-page h1 { font-size: clamp(26px, 7vw, 40px); overflow-wrap: anywhere; hyphens: auto; }
+.share-url { width: 100%; margin: 6px 0; font: inherit; font-size: 13px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--ink); }
+.types { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 14px; }
+.types .chip.on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }

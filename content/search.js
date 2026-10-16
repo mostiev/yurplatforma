@@ -141,5 +141,17 @@
     }).filter(x => x.score > 0).sort((a, b) => b.score - a.score).slice(0, limit || 8).map(x => x.item);
   }
 
-  global.SEARCH = { KW, search, words };
+  // тип документа для фильтра на главной — по названию
+  const TYPES = [["claim", "Претензии"], ["app", "Заявления"], ["complaint", "Жалобы"], ["court", "В суд"], ["contract", "Договоры и акты"], ["calc", "Калькуляторы"]];
+  function type(i) {
+    const t = i.title;
+    if (i.kind === "calc") return "calc";
+    if (/Жалоба/.test(t)) return "complaint";
+    if (/^(Договор|Соглашение|Оферта|Доверенность|Предварительный|Проект брачного|Трудовой договор|Расписка|Акт|Счёт|Гарантийное|Решение|Персональные данные на сайте)/.test(t)) return "contract";
+    if (/(^|[\s,])[Ии]ск([\s,:]|$)|приказ|Возражения|в суд|заочного|Исполнительный лист|Пропал без вести|Наследство после/.test(t)) return "court";
+    if (/Претензия|Требование|Возврат|Отмена подписки|Расторжение|Отказ от|Вернуть паспорт|Выезд/.test(t)) return "claim";
+    return "app";
+  }
+
+  global.SEARCH = { KW, search, words, type, TYPES };
 })(typeof window !== "undefined" ? window : globalThis);

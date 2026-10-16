@@ -37,6 +37,20 @@
   }
 
   const U = {
+    // ответы в ссылке (после «#» — на сервер не уходит): JSON → UTF-8 → base64url
+    packAnswers(a) {
+      const bytes = new TextEncoder().encode(JSON.stringify(a));
+      let bin = ""; bytes.forEach(b => { bin += String.fromCharCode(b); });
+      return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+    },
+    unpackAnswers(s) {
+      try {
+        const bin = atob(String(s).replace(/-/g, "+").replace(/_/g, "/"));
+        const bytes = Uint8Array.from(bin, c => c.charCodeAt(0));
+        const v = JSON.parse(new TextDecoder().decode(bytes));
+        return v && typeof v === "object" && !Array.isArray(v) ? v : null;
+      } catch (e) { return null; }
+    },
     // опись вложения (ф. 107) по документу: сам документ + строки из «Приложения:»; адрес и ценность — от руки
     opis(ps, title) {
       const att = [];
@@ -240,7 +254,18 @@
     };
     const DRAFT = "yp-draft:" + spec.id, PROFILE = "yp-profile";
     const PROFILE_KEYS = ["buyer_name", "buyer_birth", "buyer_address", "buyer_phone", "buyer_email"];
-    if (!state.prefill) {
+    // черновик по ссылке: #a=… (в адресе после «#», на сервер не отправляется)
+    try {
+      const m = String(global.location && global.location.hash || "").match(/^#a=([A-Za-z0-9_-]+)$/);
+      const got = m ? U.unpackAnswers(m[1]) : null;
+      if (got) {
+        Object.keys(got).filter(k => allIds.has(k)).forEach(k => { state.a[k] = got[k]; });
+        prune(spec, state.a);
+        state.shared = true;
+        global.history.replaceState(null, "", global.location.pathname + global.location.search);
+      }
+    } catch (e) { /* без истории браузера — просто откроем анкету */ }
+    if (!state.prefill && !state.shared) {
       const dr = LS.get(DRAFT);
       if (dr && dr.a && Date.now() - dr.at < 60 * 864e5) {
         Object.keys(dr.a).filter(k => allIds.has(k)).forEach(k => { state.a[k] = dr.a[k]; });
@@ -249,7 +274,7 @@
         state.restored = dr.at;
       }
     }
-    const prof = LS.get(PROFILE);
+    const prof = state.shared ? null : LS.get(PROFILE);
     if (prof) {
       const used = PROFILE_KEYS.filter(k => allIds.has(k) && prof[k] && (state.a[k] === undefined || state.a[k] === ""));
       used.forEach(k => { state.a[k] = prof[k]; });
@@ -474,6 +499,8 @@
       const pf = state.prefill && state.step === 0 ? state.prefill : null;
       const pfLabels = pf ? spec.steps.flatMap(s => s.questions).filter(q => pf.ids.includes(q.id)).map(q => { const l = typeof q.label === "function" ? q.label(a, d) : q.label; return String(l || q.id).replace(/[?:]\s*$/, "").toLowerCase(); }) : [];
       const notes = [];
+      if (state.shared && state.step === 0) notes.push(h("div", { class: "prefill", role: "status" }, "Открыли черновик по ссылке. Проверьте ответы и дополните своё.",
+        h("button", { type: "button", class: "sg-off", onclick: () => { state.shared = false; renderForm(false); } }, "скрыть")));
       if (state.restored && state.step === 0) notes.push(h("div", { class: "prefill", role: "status" }, `Восстановили черновик от ${U.fmtDate(new Date(state.restored))} — он хранится только в этом браузере.`,
         h("button", { type: "button", class: "sg-off", onclick: startOver }, "начать заново")));
       if (state.profileUsed && state.step === 0) notes.push(h("div", { class: "prefill", role: "status" }, "Подставили ваши контакты из «Моих данных» (они хранятся только в этом браузере).",
@@ -506,10 +533,26 @@
               if (state.step < now.length - 1) state.step++; else state.done = true;
               renderForm(true); renderPreview();
             },
-          }, state.step < steps.length - 1 ? "Далее" : "Собрать документ")));
+          }, state.step < steps.length - 1 ? "Далее" : "Собрать документ")),
+        shareBtn());
 
       if (active) { const el = document.getElementById(active); if (el) { el.focus(); try { if (sel) el.setSelectionRange(sel[0], sel[1]); } catch (e) { /* дата и число не дают ставить курсор */ } } }
       if (focusTop) $form.scrollIntoView({ block: "start", behavior: "smooth" });
+    }
+
+    // «Отправить черновик ссылкой» — для второй стороны договора или родственника
+    function shareBtn() {
+      const out = h("p", { class: "mydata share" });
+      const btn = h("button", { type: "button", class: "sg-off", onclick: async () => {
+        const url = global.location.href.split("#")[0] + "#a=" + U.packAnswers(state.a);
+        let ok = false;
+        try { await navigator.clipboard.writeText(url); ok = true; } catch (e) { ok = false; }
+        out.textContent = "";
+        out.append(ok ? "Ссылка скопирована. " : "Скопируйте ссылку: ", ok ? "" : h("input", { type: "text", value: url, readonly: true, class: "share-url", onfocus: e => e.target.select() }),
+          h("span", { class: "h" }, " В ней все ваши ответы — отправляйте только тому, кому доверяете. Нам ссылка не передаётся."));
+      } }, "Отправить черновик ссылкой");
+      out.append(btn, h("span", { class: "h" }, " — например, второй стороне договора"));
+      return out;
     }
 
     function renderDone(d) {
@@ -557,6 +600,7 @@
           const btn = h("button", { type: "button", class: "btn ghost sm", onclick: () => { const p = Object.assign({}, saved); mine.forEach(k => { p[k] = a[k]; }); LS.set(PROFILE, p); renderForm(false); } }, "Запомнить мои контакты для других документов");
           return h("p", { class: "mydata" }, btn, h("span", { class: "h" }, " Только в этом браузере. На чужом компьютере не нажимайте."));
         })(),
+        shareBtn(),
         h("p", { class: "mydata" }, h("button", { type: "button", class: "sg-off", onclick: startOver }, "Стереть ответы и начать заново")),
         spec.reminders ? U.remindersBlock(h, spec.reminders(a, d), "Сроки — " + (spec.fileName ? spec.fileName(a, d) : spec.title)) : null,
         // следующий шаг цепочки: spec.next(a, d) → [{ id, text, when?, fill }] — ответы переносятся в следующий документ (только эта вкладка)

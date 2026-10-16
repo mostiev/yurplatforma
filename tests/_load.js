@@ -4,7 +4,7 @@ const path = require("path");
 const vm = require("vm");
 // base — документ, поверх которого сделан вариант (load("m03", "d12"))
 module.exports = function load(id, base) {
-  const ctx = { TextEncoder, console, Date };
+  const ctx = { TextEncoder, TextDecoder, btoa, atob, console, Date };
   ctx.globalThis = ctx;
   vm.createContext(ctx);
   for (const f of ["assets/docx.js", "assets/engine.js", "assets/keyrate.js", "assets/calendar.js", "assets/common.js", ...(base ? [`content/${base}.js`] : []), `content/${id}.js`]) {

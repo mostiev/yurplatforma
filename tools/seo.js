@@ -47,13 +47,14 @@ function loadSpec(htmlFile) {
 const pages = fs.readdirSync(path.join(root, "d")).filter(f => f.endsWith(".html"));
 
 // приватность: никаких запросов к сторонним серверам (Google Fonts убраны), ссылки на соглашение и политику в подвале
-for (const rel of ["index.html", "chto-delat.html", "proverka.html", "usloviya.html", "privacy.html", ...pages.map(f => "d/" + f)]) {
+for (const rel of ["index.html", "chto-delat.html", "proverka.html", "usloviya.html", "privacy.html", "404.html", ...pages.map(f => "d/" + f)]) {
   const file = path.join(root, rel);
   if (!fs.existsSync(file)) continue;
-  const up = rel.startsWith("d/") ? "../" : "";
+  const up = rel === "404.html" ? "/" : rel.startsWith("d/") ? "../" : "";
   let html = fs.readFileSync(file, "utf8")
     .replace(/<link rel="preconnect" href="https:\/\/fonts\.googleapis\.com">\n/g, "")
     .replace(/<link rel="stylesheet" href="https:\/\/fonts\.googleapis\.com[^>]*>\n/g, "");
+  html = put(html, "icon", `<link rel="icon" href="${up}favicon.svg" type="image/svg+xml">\n`, (h, b) => h.replace(/(<link rel="stylesheet")/, b + "$1"));
   html = put(html, "legal", `<nav class="legal"><a href="${up}usloviya.html">Условия использования</a> · <a href="${up}privacy.html">Политика конфиденциальности</a></nav>`, (h, b) => h.replace(/<\/footer>/, b + "</footer>"));
   fs.writeFileSync(file, html);
 }
