@@ -63,4 +63,10 @@ t("никто не принял: ответчик — муниципалитет
   assert.deepEqual(allErrors(r.a), []);
 });
 
+t("подсказка о суде: наследственные споры не у мирового судьи (п. 5 ч. 1 ст. 23 ГПК; проверка 30.10.2026)", () => {
+  const q = spec.steps.flatMap(s => s.questions).find(q => q.id === "court");
+  const h = q.hint({ acted: "no", others: "heirs" });
+  assert(h.includes("районный суд при любой цене") && !h.includes("мировой судья"));
+});
+
 done();

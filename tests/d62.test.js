@@ -42,4 +42,10 @@ t("долга нет — стоп для иска", () => {
   assert(run(base, { route: "court", court: "Мировому судье", paid: 200000 }).stop);
 });
 
+t("иск по нотариальному соглашению — п. 1 ст. 115 и мягкое предупреждение (проверка 30.10.2026)", () => {
+  const r = run(base, { route: "court", basis: "agreement", court: "Мировому судье судебного участка № 1" });
+  assert(r.stop && r.stop.soft);
+  assert(r.text.includes("п. 1 ст. 115") && !r.text.includes("обязанного уплачивать алименты по решению суда"));
+});
+
 done();

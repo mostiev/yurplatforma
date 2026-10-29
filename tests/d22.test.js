@@ -26,4 +26,11 @@ t("без неустойки — прямо сказано, что не пред
   assert(run(base, { penalty: undefined }).text.includes("неустойка соглашением не предусмотрена"));
 });
 
+t("33,33% на двоих не отсекается и пишется как «одной трети»; нумерация 2.1, 2.2… сплошная (проверка 30.10.2026)", () => {
+  const two = "Петров Иван Петрович; 01.02.2016\nПетрова Анна Петровна; 03.04.2019";
+  const r = run(base, { kids: two, method: "share", share_pct: 33.33 });
+  assert(!r.stop && r.text.includes("одной трети заработка") && r.text.includes("2.2. Алименты уплачиваются не позднее"));
+  assert(run(base, { kids: two, method: "share", share_pct: 33.3 }).stop);
+});
+
 done();

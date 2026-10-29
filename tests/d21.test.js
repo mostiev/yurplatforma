@@ -28,4 +28,10 @@ t("муж, ребёнку меньше года, жена против — ст�
   assert(!run(base, { plaintiff_role: "husband", consent: "yes", kids }).stop);
 });
 
+t("муж без согласия жены во время беременности — стоп по ст. 17 СК (проверка 30.10.2026)", () => {
+  const r = run(base, { plaintiff_role: "husband", consent: "no", pregnant: "yes" });
+  assert(r.stop && r.stop.title.includes("беременности"));
+  assert(!run(base, { plaintiff_role: "husband", consent: "yes", pregnant: "yes" }).stop);
+});
+
 done();

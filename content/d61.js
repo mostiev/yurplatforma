@@ -40,6 +40,7 @@
     title: "Заявление нотариусу о наследстве",
     lead: "Заявление о принятии наследства и выдаче свидетельства — или об отказе от наследства, в том числе в пользу другого наследника. Проверим срок. Займёт около 7 минут.",
     status: "draft",
+    actual: "30.10.2026",
     defaults: { kind: "accept", basis: "law", gender: "m", d_gender: "m", spouse_share: "no", late_right: "no", delivery: "self" },
 
     steps: [
