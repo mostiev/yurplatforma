@@ -118,4 +118,12 @@ t("полный документ без заглушек и валидный .do
   fs.writeFileSync(path.join(__dirname, "out", "d01-tech.docx"), Docx.buildDocx(spec.render(r.a, r.d)));
 });
 
+t("технически сложный, 40 дней: неустранимый недостаток открывает возврат (проверка 30.10.2026)", () => {
+  const { a, d } = run({ repairs: "none", essential: "yes" });
+  assert(d.techGround && d.techGround.includes("существенный недостаток"));
+  assert(!disabled(a, d, "refund"));
+  const r = run({ repairs: "none", essential: "yes", demand: "refund", refund_method: "card" });
+  assert(r.text.includes("неустраним") && r.text.includes("готов(а) возвратить товар") && !r.text.includes("Товар готов"));
+});
+
 console.log(`\n${n} проверок пройдено`);

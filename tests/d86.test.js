@@ -24,7 +24,7 @@ t("второй шаг: возврат денег, неустойка 1%", () =>
   const r = run(base, { stage: "second", first_date: ago(1), demand2: "refund" });
   assert(r.text.includes("о возврате денег за товар") && r.text.includes("60 000 (шестьдесят тысяч) рублей на банковскую карту") && r.text.includes("статья 23 Закона"));
   assert.deepEqual(allErrors(r.a), []);
-  assert(run(base, { stage: "second", demand2: "price_cut", amount: 20000 }).text.includes("о соразмерном уменьшении цены"));
+  assert(run(base, { stage: "second", demand2: "costs", amount: 20000 }).text.includes("о возмещении расходов на устранение"));
 });
 
 t("в пределах двух лет → ссылка на претензию продавцу; после срока службы — мягко", () => {
@@ -33,6 +33,14 @@ t("в пределах двух лет → ссылка на претензию 
   const late = run(base, { life: "yes", life_years: 3 });
   assert(late.stop.soft && late.stop.title.includes("срока службы"));
   assert(run(base, { life: "yes", life_years: 7 }).text.includes("срока службы (7 лет)"));
+});
+
+t("второй шаг: изготовителю — замена или расходы, уменьшения цены нет (п. 3 ст. 18; проверка 30.10.2026)", () => {
+  const opts = spec.steps[2].questions.find(q => q.id === "demand2").options.map(o => o.value);
+  assert(!opts.includes("price_cut") && opts.includes("costs"));
+  const r = run(base, { stage: "second", first_date: ago(1), demand2: "costs", amount: 15000 });
+  assert(r.text.includes("возместить мои расходы") && r.text.includes("пункт 3 статьи 18") && !r.text.includes("⟨"));
+  assert(spec.guidance(r.a, r.d).some(g => g.text.includes("п. 3 ст. 17")));
 });
 
 done();

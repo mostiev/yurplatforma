@@ -50,5 +50,5 @@
     ["2026-06-22", 14.25],
     ["2026-07-27", 14.00],
   ];
-  global.KEYRATE_CHECKED = "2026-09-28";
+  global.KEYRATE_CHECKED = "2026-10-30";
 })(typeof window !== "undefined" ? window : globalThis);

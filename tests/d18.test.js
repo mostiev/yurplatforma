@@ -30,4 +30,10 @@ t("не передана — считаем по сегодня и требуе�
   function C_rate(r) { return r.d.calc.base; }
 });
 
+t("отсрочка до 31.12.2026 — только для требований до 01.01.2026 (проверка 30.10.2026)", () => {
+  const r = run(base, {});
+  const g = spec.guidance(r.a, r.d).find(x => x.title.includes("31.12.2026"));
+  assert(g && g.text.includes("до 01.01.2026"));
+});
+
 done();

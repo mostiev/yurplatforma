@@ -60,4 +60,19 @@ t("отказ с убытками — сумма убытков в тексте"
   writeDocx("d04-refund.docx", r.a, r.d);
 });
 
+t("после двух лет существенный недостаток — мягкий маршрут по п. 6 ст. 29, 20 дней (проверка 30.10.2026)", () => {
+  const late = { warranty: "no", accepted_date: monthsAgo(30), contract_date: monthsAgo(31), defect_date: ago(3) };
+  const hard = run(base, late); assert(hard.stop && !hard.stop.soft && hard.stop.text.includes("п. 6 ст. 29"));
+  const r = run(base, Object.assign({}, late, { essential: "yes", demand: "fix" }));
+  assert(r.stop && r.stop.soft && r.d.essentialLate);
+  assert(r.text.includes("в течение 20 дней") && r.text.includes("п. 6 ст. 29") && !r.text.includes("⟨"));
+  const opts = spec.steps[2].questions.find(q => q.id === "demand").options;
+  const dis = v => opts.find(o => o.value === v).disabled(r.a, r.d);
+  assert(!dis("fix") && dis("redo") && dis("price_cut") && dis("refund"));
+  const r2 = run(base, Object.assign({}, late, { essential: "yes", fix_failed: "yes", fix_request_date: ago(30) }));
+  const dis2 = v => opts.find(o => o.value === v).disabled(r2.a, r2.d);
+  assert(!dis2("price_cut") && !dis2("refund") && dis2("redo"));
+  assert(run(base, Object.assign({}, late, { essential: "yes", accepted_date: monthsAgo(130), contract_date: monthsAgo(131) })).stop.soft !== true);
+});
+
 done();

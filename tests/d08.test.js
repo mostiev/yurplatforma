@@ -39,4 +39,9 @@ t("смена ситуации стирает чужие поля", () => {
   assert.equal(r.a.charged_total, undefined); assert.equal(r.a.cancel_how, undefined);
 });
 
+t("без согласия: 3 дня по п. 3.1 ст. 16 (проверка 30.10.2026)", () => {
+  const r = run(base, { situation: "no_consent", first_charge_date: iso(U.addDays(today, -40)), charged_total: 1200 });
+  assert(r.text.includes("трёх дней") && r.text.includes("п. 3.1 ст. 16 Закона"));
+});
+
 done();

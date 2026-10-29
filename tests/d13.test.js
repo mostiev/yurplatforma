@@ -43,4 +43,11 @@ t("удержание больше залога — ошибка", () => {
   assert(allErrors(run(base, { mode: "return", ret_damage: "no", deposit: 1000, deduction: 5000 }).a).includes("deduction"));
 });
 
+t("нумерация акта сплошная при любом наборе пунктов (проверка 30.10.2026)", () => {
+  const r = run(base, { photos: "no", note: "Ключ от балкона у собственника." });
+  assert(r.text.includes("5. Ключ от балкона") && !r.text.includes("5.1."));
+  const ret = run(base, { mode: "return", photos: "no", ret_damage: "no", deposit: 30000, deduction: 0 });
+  assert(ret.text.includes("5. Ущерба") && ret.text.includes("6. Обеспечительный"));
+});
+
 done();
