@@ -23,8 +23,14 @@ t("нужно выбрать хотя бы одно нарушение", () => {
   assert(allErrors(run(base, { violations: undefined }).a).includes("violations"));
 });
 
-t("незаконное увольнение — стоп: суд в течение месяца", () => {
-  assert(run(base, { illegal_dismissal: "yes" }).stop);
+t("незаконное увольнение — мягкое предупреждение про суд, жалобу можно собрать (проверка 08.11.2026)", () => {
+  const r = run(base, { illegal_dismissal: "yes" });
+  assert(r.stop && r.stop.soft && r.stop.text.includes("392"));
+});
+
+t("охрана труда — ссылка на ст. 5.27.1 КоАП", () => {
+  assert(run(base, { violations: ["safety"] }).text.includes("5.27, 5.27.1 КоАП"));
+  assert(!run(base, { violations: ["salary"] }).text.includes("5.27.1"));
 });
 
 done();

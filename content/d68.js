@@ -36,6 +36,7 @@
     title: "Договор оказания услуг или подряда между компаниями и ИП",
     lead: "Конструктор договора для бизнеса: что делаете, сколько стоит, как платят и принимают, ответственность, НДС, ЭДО, подсудность. Перечень работ и форма акта — в приложениях. Займёт около 10 минут.",
     status: "draft",
+    actual: "08.11.2026",
     defaults: { kind: "services", schedule: "once", payment: "part", prepay_pct: 50, pay_days: 5, vat: "none", accept_days: 5, pen_ex: "0.1", pen_cl: "0.1", cap: "price", refusal_fee: "none", conf: "yes", ip_rights: "transfer", warranty: 6, edo: "email", claim_days: 10, court: "defendant", ex_kind: "org", cl_kind: "org" },
 
     steps: [

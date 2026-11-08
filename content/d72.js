@@ -29,6 +29,7 @@
     title: "Соглашение о неразглашении (NDA)",
     lead: "Перед переговорами, с подрядчиком, фрилансером или партнёром: что считается конфиденциальным, сколько хранить тайну после окончания работы, штраф за разглашение. Займёт около 5 минут.",
     status: "draft",
+    actual: "08.11.2026",
     defaults: { mutual: "one", kinds: ["tech", "commercial", "clients"], years: 3, return_days: 10, ct_regime: "no", a_kind: "org", b_kind: "org" },
 
     steps: [

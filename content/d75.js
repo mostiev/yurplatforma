@@ -32,6 +32,7 @@
     title: "Договор ГПХ с физлицом или самозанятым",
     lead: "Разовая работа или услуга от человека без статуса ИП — без признаков трудового договора, с удержанием НДФЛ, взносами и формой акта. Или договор с самозанятым. Займёт около 7 минут.",
     status: "draft",
+    actual: "08.11.2026",
     defaults: { status: "person", kind: "services", pay: "after", pay_days: 5, travm: "no", ip_rights: "transfer", cl_kind: "org", former: "no" },
 
     steps: [

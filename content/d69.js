@@ -31,6 +31,7 @@
     title: "Договор поставки",
     lead: "Разовая поставка со спецификацией или рамочный договор с заявками: товар, цена с НДС, доставка, отсрочка, приёмка, брак, ответственность. Займёт около 10 минут.",
     status: "draft",
+    actual: "08.11.2026",
     defaults: { mode: "once", vat: "none", delivery: "supplier", payment: "part", prepay_pct: 50, pay_days: 5, defer_days: 30, title: "delivery", quality_days: 10, fix_days: 10, warranty: 0, pen_sp: "0.1", pen_by: "0.1", edo: "email", claim_days: 10, court: "defendant", sp_kind: "org", by_kind: "org" },
 
     steps: [

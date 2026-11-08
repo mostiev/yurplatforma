@@ -36,6 +36,7 @@
     title: "Договор аренды нежилого помещения",
     lead: "Офис, склад, магазин, кафе, производство: арендная плата с НДС, коммуналка, залог, арендные каникулы на ремонт, индексация, улучшения, досрочное расторжение. Акт приёма-передачи — в приложении. Займёт около 10 минут.",
     status: "draft",
+    actual: "08.11.2026",
     defaults: { term_months: 11, vat: "none", utilities: "compensate", pay_day: 5, deposit_months: 1, index: "none", improvements: "no_comp", sublease: "consent", tn_exit: 60, exit_fee: "deposit", ll_refusal: "yes", late_days: 15, edo: "email", claim_days: 10, court: "defendant", ll_kind: "org", tn_kind: "org" },
 
     steps: [
