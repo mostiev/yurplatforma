@@ -88,7 +88,7 @@
     title: "Кредиты участника СВО: каникулы и списание долга",
     lead: "Требование в банк о кредитных каникулах на время службы и ещё 180 дней, уведомление о прекращении долга при гибели или инвалидности I группы, списание долгов до 10 млн ₽ по контракту от года. Для самого военнослужащего и членов семьи. Займёт около 7 минут.",
     status: "draft",
-    actual: "16.10.2026",
+    actual: "08.11.2026",
     defaults: { mil_gender: "m", kind: "holiday", who: "self", status: "mobilized", loan_type: "consumer", borrower: "military", death_kind: "died", term_year: "yes", court_kind: "court", relation: "spouse" },
 
     steps: [

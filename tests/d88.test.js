@@ -25,7 +25,7 @@ t("член семьи, мобилизация, часть долгов — ал
 });
 
 t("только алименты — ссылка на прожиточный минимум; взыскатель — п. 3.1", () => {
-  assert.equal(run(base, { excluded: "all" }).stop.link.href, "d38.html");
+  assert.equal(run(base, { excluded: "all" }).stop.link.href, "k5.html"); // проверка 08.11.2026: ПМ по алиментам не сохраняется (ч. 3.1 ст. 99)
   const c = run(base, { role: "creditor" });
   assert(c.text.includes("пункта 3.1 части 1 статьи 40") && c.text.includes("Взыскатель: Петров") && !c.text.includes("исполнительский сбор"));
 });
