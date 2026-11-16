@@ -43,6 +43,7 @@ window.CATALOG = {
     {"id": "d15", "code": "Д-15", "title": "Заявление на перерасчёт платы за ЖКУ", "section": "housing", "kind": "doc", "live": true},
     {"id": "d16", "code": "Д-16", "title": "Жалоба на УК в жилинспекцию", "section": "housing", "kind": "doc", "live": true},
     {"id": "d17", "code": "Д-17", "title": "Претензия при заливе квартиры", "section": "housing", "kind": "doc", "live": true},
+    {"id": "d95", "code": "Д-95", "title": "Шумные соседи: письмо соседу или заявление участковому", "section": "housing", "kind": "doc", "live": true},
     {"id": "d18", "code": "Д-18", "title": "Претензия застройщику о неустойке за просрочку", "section": "newbuild", "kind": "doc", "live": true},
     {"id": "d19", "code": "Д-19", "title": "Претензия о недостатках квартиры в новостройке", "section": "newbuild", "kind": "doc", "live": true},
     {"id": "d20", "code": "Д-20", "title": "Заявление о расторжении брака в ЗАГС", "section": "family", "kind": "doc", "live": true},
