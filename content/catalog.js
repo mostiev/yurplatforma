@@ -112,6 +112,7 @@ window.CATALOG = {
     {"id": "d88", "code": "Д-88", "title": "Приставы: приостановить взыскание на время СВО", "section": "military", "kind": "doc", "live": true},
     {"id": "d89", "code": "Д-89", "title": "Пропал без вести на СВО: заявление в суд", "section": "military", "kind": "doc", "live": true},
     {"id": "k16", "code": "К-16", "title": "Какие выплаты положены участнику СВО и семье", "section": "military", "kind": "calc", "live": true},
-    {"id": "d90", "code": "Д-90", "title": "Апелляционная жалоба на решение суда", "section": "court", "kind": "doc", "live": true}
+    {"id": "d90", "code": "Д-90", "title": "Апелляционная жалоба на решение суда", "section": "court", "kind": "doc", "live": true},
+    {"id": "k17", "code": "К-17", "title": "Срок исковой давности: не опоздал ли я в суд", "section": "court", "kind": "calc", "live": true}
   ]
 };
