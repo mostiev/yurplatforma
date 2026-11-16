@@ -37,6 +37,7 @@ window.CATALOG = {
     {"id": "d83", "code": "Д-83", "title": "Договор дарения квартиры", "section": "realty", "kind": "doc", "live": true},
     {"id": "k15", "code": "К-15", "title": "Сколько стоит сделка с квартирой", "section": "realty", "kind": "calc", "live": true},
     {"id": "k13", "code": "К-13", "title": "Сдаю квартиру: сколько налога", "section": "housing", "kind": "calc", "live": true},
+    {"id": "k18", "code": "К-18", "title": "Пени за коммунальные услуги: калькулятор и проверка УК", "section": "housing", "kind": "calc", "live": true},
     {"id": "d13", "code": "Д-13", "title": "Акт приёма-передачи квартиры с описью", "section": "housing", "kind": "doc", "live": true},
     {"id": "d14", "code": "Д-14", "title": "Претензия о возврате залога за квартиру", "section": "housing", "kind": "doc", "live": true},
     {"id": "d15", "code": "Д-15", "title": "Заявление на перерасчёт платы за ЖКУ", "section": "housing", "kind": "doc", "live": true},
