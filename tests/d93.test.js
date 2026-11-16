@@ -22,9 +22,11 @@ t("заём 2024 года — 130%, без превышения", () => {
   assert.equal(r.d.cap.txt, "130%"); assert.equal(r.d.over, 0); assert(r.text.includes("требовать с меня можно не более 31 000 руб."));
 });
 
-t("ставка выше 0,8% в день — отдельный довод", () => {
+t("ставка выше 0,8% в день — отдельный довод; для займа до 01.07.2023 предел был 1%", () => {
   const r = run(base, { daily_rate: 1 });
-  assert(r.d.rateOver && r.text.includes("ч. 23 ст. 5"));
+  assert(r.d.rateOver && r.text.includes("ч. 23 ст. 5") && r.text.includes("0,8% в день"));
+  assert(!run(base, { daily_rate: 1, loan_date: "2022-05-10" }).d.rateOver);
+  assert(run(base, { daily_rate: 1.2, loan_date: "2022-05-10" }).text.includes("предельные 1% в день"));
 });
 
 t("банк: без расчёта предела, просьба об увеличении срока; следующий шаг — каникулы", () => {

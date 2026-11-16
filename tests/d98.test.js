@@ -11,7 +11,7 @@ const base = {
 
 t("жалоба: ч. 1.1 и ч. 4 ст. 27.13, отмена и прекращение, возврат 8 500 за эвакуацию и хранение", () => {
   const r = run(base, {});
-  assert(r.text.includes("ч. 1.1 ст. 27.13") && r.text.includes("ч. 4 ст. 27.13") && r.text.includes("ст. 1.5 КоАП"));
+  assert(r.text.includes("ч. 1.1 ст. 27.13") && r.text.includes("ч. 8 ст. 27.13") && r.text.includes("ч. 12 ст. 27.13") && r.text.includes("ст. 1.5 КоАП"));
   assert(r.text.includes("8 500 руб.") && r.text.includes("ч. 11 ст. 27.13") && r.text.includes("Отменить постановление"));
   assert(!r.d.late && !r.text.includes("Восстановить срок"));
   assert.deepEqual(allErrors(r.a), []); assert(!r.text.includes("⟨"), r.text);

@@ -36,6 +36,8 @@
     if (dt >= new Date(2026, 3, 1)) return { k: 1.0, txt: "100%", since: "01.04.2026", law: "ч. 24 ст. 5 Федерального закона № 353-ФЗ в ред. Федерального закона от 29.12.2025 № 545-ФЗ" };
     if (dt >= new Date(2023, 6, 1)) return { k: 1.3, txt: "130%", since: "01.07.2023", law: "ч. 24 ст. 5 Федерального закона № 353-ФЗ" };
     if (dt >= new Date(2020, 0, 1)) return { k: 1.5, txt: "150%", since: "01.01.2020", law: "ч. 24 ст. 5 Федерального закона № 353-ФЗ" };
+    if (dt >= new Date(2019, 6, 1)) return { k: 2, txt: "200%", since: "01.07.2019", law: "п. 2 ч. 4 ст. 3 Федерального закона от 27.12.2018 № 554-ФЗ" };
+    if (dt >= new Date(2019, 0, 28)) return { k: 2.5, txt: "250%", since: "28.01.2019", law: "п. 1 ч. 4 ст. 3 Федерального закона от 27.12.2018 № 554-ФЗ" };
     return null;
   }
 
@@ -48,8 +50,10 @@
     const limit = cap ? principal * cap.k : 0;
     const over = cap && principal && accrued > limit ? Math.round((accrued - limit) * 100) / 100 : 0;
     const maxLeft = cap && principal ? Math.max(0, Math.round((principal + limit - paid) * 100) / 100) : 0; // сколько ещё можно требовать
-    const rateOver = mfo && num(a.daily_rate) > 0.8;
-    return { mfo, date, cap, principal, paid, claimed, accrued, limit, over, maxLeft, rateOver };
+    // ч. 23 ст. 5 353-ФЗ: 0,8% в день с 01.07.2023, до этого (с 01.07.2019) — 1% в день; более ранние договоры не проверяем
+    const rateMax = !date || date < new Date(2019, 6, 1) ? null : date < new Date(2023, 6, 1) ? 1 : 0.8;
+    const rateOver = !!(mfo && rateMax && num(a.daily_rate) > rateMax);
+    return { mfo, date, cap, principal, paid, claimed, accrued, limit, over, maxLeft, rateOver, rateMax };
   }
 
   const spec = {
@@ -122,13 +126,13 @@
         if (d.over) T(`Я уже уплатил(а) ${R(d.paid)}, и с меня требуют ещё ${R(d.claimed)}. Таким образом, начислено ${R(d.accrued)} сверх суммы займа — на ${R(d.over)} больше законного предела. Начисления сверх предела незаконны и подлежат списанию; требовать с меня можно не более ${R(d.maxLeft)}.`);
         else T(`Прошу учитывать этот предел: с учётом уже уплаченных ${R(d.paid)} требовать с меня можно не более ${R(d.maxLeft)}.`);
       }
-      if (d.rateOver) T(`Ставка по договору ${String(a.daily_rate).replace(".", ",")}% в день превышает предельные 0,8% в день (ч. 23 ст. 5 Федерального закона № 353-ФЗ). Проценты сверх этого размера начислены незаконно.`);
+      if (d.rateOver) T(`Ставка по договору ${String(a.daily_rate).replace(".", ",")}% в день превышает предельные ${String(d.rateMax).replace(".", ",")}% в день (ч. 23 ст. 5 Федерального закона № 353-ФЗ в редакции на дату договора). Проценты сверх этого размера начислены незаконно.`);
 
       P.push({ text: "На основании ст. 450, 451 ГК РФ, ст. 5, 10 Федерального закона «О потребительском кредите (займе)»", indent: true, keepNext: true });
       P.push({ text: "ПРОШУ:", indent: true, keepNext: true });
       const ask = [];
       if (d.over) ask.push(`Произвести перерасчёт задолженности и списать начисления сверх законного предела — ${R(d.over)}.`);
-      if (d.rateOver) ask.push("Пересчитать проценты исходя из ставки не более 0,8% в день.");
+      if (d.rateOver) ask.push(`Пересчитать проценты исходя из ставки не более ${String(d.rateMax).replace(".", ",")}% в день.`);
       (a.ask || []).forEach(k => ASK[k] && ask.push(ASK[k][0].toUpperCase() + ASK[k].slice(1) + (k === "schedule" && num(a.can_pay) ? `, с ежемесячным платежом не более ${R(num(a.can_pay))}.` : ".")));
       if (!ask.length) ask.push(F(null, "о чём просите"));
       ask.push("Предоставить мне бесплатно сведения о текущей задолженности с расчётом: основной долг, проценты, неустойки (ч. 1 ст. 10 Федерального закона № 353-ФЗ).");

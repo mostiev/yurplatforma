@@ -25,9 +25,20 @@ t("часть платежей в сроке + судебный приказ с�
   assert(r.text.includes("отказать в требованиях по платежам со сроком исполнения до 15.09.2023") && r.text.includes("п. 1 ст. 204 ГК РФ"));
 });
 
+t("иск в течение 6 месяцев после отмены приказа — граница от даты заявления о приказе (п. 3 ст. 204)", () => {
+  const r = run(base, { last_due: "2025-06-10", order: "yes", order_filed: "2025-09-01", order_cancel: "2025-10-01", filed_date: "2026-01-15" });
+  assert(r.d.ext); assert.equal(r.d.boundary.getTime(), new Date(2022, 8, 1).getTime());
+  assert(r.text.includes("п. 3 ст. 204 ГК РФ") && r.text.includes("до 01.09.2022"));
+});
+
 t("коллектор и чужой договор: подлинники, экспертиза, переход к общему порядку в упрощёнке", () => {
   const r = run(base, { args: ["assign", "not_mine"], procedure: "simplified", deadline: "2026-12-10", details: "Договор не подписывал." });
   assert(r.text.includes("ст. 382, 384 ГК РФ") && r.text.includes("почерковедческую") && r.text.includes("ч. 4 ст. 232.2 ГПК РФ") && r.text.includes("ч. 2 ст. 71"));
+});
+
+t("МФО: заём до 28.01.2019 — предел не считаем, просим проверить", () => {
+  const r = run(base, { args: ["mfo"], principal: 20000, loan_date: "2018-05-01" });
+  assert(r.d.mfoCap === 0 && r.text.includes("подлежат проверке") && !r.text.includes("не более 0"));
 });
 
 t("МФО: предел 100% для займа 2026 года", () => {
