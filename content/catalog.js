@@ -10,6 +10,7 @@ window.CATALOG = {
     {"id": "d06", "code": "Д-06", "title": "Претензия по покупке на маркетплейсе", "section": "consumer", "kind": "doc", "live": true},
     {"id": "d85", "code": "Д-85", "title": "Претензия частному продавцу или мастеру", "section": "consumer", "kind": "doc", "live": true},
     {"id": "d86", "code": "Д-86", "title": "Требование к изготовителю: сломалось после двух лет", "section": "consumer", "kind": "doc", "live": true},
+    {"id": "d91", "code": "Д-91", "title": "Иск о защите прав потребителя", "section": "consumer", "kind": "doc", "live": true},
     {"id": "d07", "code": "Д-07", "title": "Расторжение договора с фитнес-клубом или салоном", "section": "consumer", "kind": "doc", "live": true},
     {"id": "d08", "code": "Д-08", "title": "Отмена подписки и возврат автосписаний", "section": "consumer", "kind": "doc", "live": true},
     {"id": "d09", "code": "Д-09", "title": "Претензия туроператору", "section": "consumer", "kind": "doc", "live": true},

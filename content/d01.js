@@ -258,6 +258,9 @@
         { when: "Продавец не ответил за 10 дней", id: "k1", text: "Посчитать неустойку 1% в день" },
         { when: "Отказал или молчит", id: "d53", text: "Жалоба в Роспотребнадзор", fill: Object.assign({ seller: a.seller_name, seller_address: a.seller_address, buy_date: a.received_date,
           violations: [a.demand === "refund" ? "refund" : "quality", "claim"], desc: [a.product && `Купил(а) ${String(a.product).trim()}.`, a.defect && `Недостаток: ${String(a.defect).trim().replace(/\.$/, "")}.`, "Направил(а) продавцу претензию, требование не удовлетворено."].filter(Boolean).join(" ") }, who) },
+        { when: "Не выполнили претензию", id: "d91", text: "Иск в суд: деньги, неустойка, штраф 50%", fill: Object.assign({ subject: "goods", product: a.product, contract_date: a.received_date, price: a.price,
+          seller_name: a.seller_name, seller_address: a.seller_address, claim_sent: "yes",
+          violation: a.defect ? `Обнаружен недостаток: ${String(a.defect).trim().replace(/\.$/, "")}.` : undefined }, who) },
       ];
     },
 
