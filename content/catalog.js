@@ -50,6 +50,7 @@ window.CATALOG = {
     {"id": "d22", "code": "Д-22", "title": "Соглашение об уплате алиментов", "section": "family", "kind": "doc", "live": true},
     {"id": "d23", "code": "Д-23", "title": "Взыскание алиментов: судебный приказ или иск", "section": "family", "kind": "doc", "live": true},
     {"id": "d24", "code": "Д-24", "title": "Проект брачного договора", "section": "family", "kind": "doc", "live": true},
+    {"id": "d94", "code": "Д-94", "title": "Порядок общения с ребёнком: соглашение или иск", "section": "family", "kind": "doc", "live": true},
     {"id": "d25", "code": "Д-25", "title": "Заявление об увольнении по собственному желанию", "section": "work", "kind": "doc", "live": true},
     {"id": "d26", "code": "Д-26", "title": "Жалоба в трудовую инспекцию", "section": "work", "kind": "doc", "live": true},
     {"id": "d27", "code": "Д-27", "title": "Претензия о задержке зарплаты с компенсацией", "section": "work", "kind": "doc", "live": true},
