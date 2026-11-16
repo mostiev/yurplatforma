@@ -53,6 +53,7 @@ window.CATALOG = {
     {"id": "d26", "code": "Д-26", "title": "Жалоба в трудовую инспекцию", "section": "work", "kind": "doc", "live": true},
     {"id": "d27", "code": "Д-27", "title": "Претензия о задержке зарплаты с компенсацией", "section": "work", "kind": "doc", "live": true},
     {"id": "d28", "code": "Д-28", "title": "Запрос документов у работодателя", "section": "work", "kind": "doc", "live": true},
+    {"id": "d92", "code": "Д-92", "title": "Иск о восстановлении на работе", "section": "work", "kind": "doc", "live": true},
     {"id": "d29", "code": "Д-29", "title": "Договор оказания услуг для самозанятого", "section": "freelance", "kind": "doc", "live": true},
     {"id": "d30", "code": "Д-30", "title": "Акт оказанных услуг", "section": "freelance", "kind": "doc", "live": true},
     {"id": "d31", "code": "Д-31", "title": "Счёт на оплату", "section": "freelance", "kind": "doc", "live": true},
