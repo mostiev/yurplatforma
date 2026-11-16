@@ -403,7 +403,7 @@
         const type = q.type === "date" ? "date" : (q.type === "money" || q.type === "number") ? "number" : q.type === "email" ? "email" : q.type === "tel" ? "tel" : "text";
         control = h("input", {
           id, type, placeholder: (typeof q.placeholder === "function" ? q.placeholder(state.a, d) : q.placeholder) || "", inputmode: q.type === "money" ? "decimal" : null,
-          min: q.type === "money" || q.type === "number" ? (q.min ?? 0) : null, step: q.type === "money" ? "0.01" : null,
+          min: q.type === "money" || q.type === "number" ? (q.min ?? 0) : null, step: q.type === "money" ? "0.01" : q.step || null,
           // по умолчанию дата — прошедшее событие; future: true — можно выбрать будущую дату
           max: q.type === "date" && !q.future ? U.iso(U.today()) : null,
           autocomplete: q.autocomplete || null,

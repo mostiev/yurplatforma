@@ -72,6 +72,7 @@ window.CATALOG = {
     {"id": "d43", "code": "Д-43", "title": "Заявление об отмене заочного решения", "section": "bailiffs", "kind": "doc", "live": true},
     {"id": "d44", "code": "Д-44", "title": "Требование о разблокировке карты или счёта", "section": "banks", "kind": "doc", "live": true},
     {"id": "d45", "code": "Д-45", "title": "Заявление на кредитные каникулы", "section": "banks", "kind": "doc", "live": true},
+    {"id": "d93", "code": "Д-93", "title": "Нечем платить кредит или микрозайм: реструктуризация и перерасчёт", "section": "banks", "kind": "doc", "live": true},
     {"id": "d46", "code": "Д-46", "title": "Возврат страховки в период охлаждения", "section": "banks", "kind": "doc", "live": true},
     {"id": "d47", "code": "Д-47", "title": "Возврат страховки при досрочном погашении", "section": "banks", "kind": "doc", "live": true},
     {"id": "d48", "code": "Д-48", "title": "Отказ от допуслуг при автокредите", "section": "banks", "kind": "doc", "live": true},
