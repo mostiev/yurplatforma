@@ -32,6 +32,6 @@ t("быстрые ситуации: у каждой 2+ опубликованн�
 });
 t("на страницах документов есть хлебные крошки и «Ещё в разделе» (tools/seo.js)", () => {
   const html = fs.readFileSync(path.join(__dirname, "..", "d", "d25.html"), "utf8");
-  assert(html.includes('class="crumbs"') && html.includes("index.html#s=work") && html.includes("Ещё в разделе «Работа»"));
+  assert(html.includes('class="crumbs"') && html.includes("index.html#work") && html.includes("Ещё в разделе «Работа»"));
 });
 console.log(`\n${n} проверок пройдено`);

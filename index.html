@@ -7,7 +7,7 @@
 <meta name="description" content="Претензии, заявления и договоры по вашей ситуации: отвечаете на вопросы — получаете готовый документ по закону РФ.">
 <!--seo:icon--><link rel="icon" href="favicon.svg" type="image/svg+xml">
 <!--/seo:icon-->
-<link rel="stylesheet" href="assets/site.css?v=202611171324">
+<link rel="stylesheet" href="assets/site.css?v=202611171325">
 </head>
 <body>
 <div class="wrap">
@@ -29,9 +29,9 @@
   <footer class="site">Документы составляются по вашим ответам и не являются юридической консультацией.<!--seo:legal--><nav class="legal"><a href="usloviya.html">Условия использования</a> · <a href="privacy.html">Политика конфиденциальности</a></nav><!--/seo:legal-->
 </footer>
 </div>
-<script src="content/catalog.js?v=202611171324"></script>
-<script src="content/search.js?v=202611171324"></script>
-<script src="content/popular.js?v=202611171324"></script>
+<script src="content/catalog.js?v=202611171325"></script>
+<script src="content/search.js?v=202611171325"></script>
+<script src="content/popular.js?v=202611171325"></script>
 <script>
 (function () {
   "use strict";
@@ -49,7 +49,7 @@
   function byId(id) { return C.items.find(function (i) { return i.id === id; }); }
 
   // быстрые ситуации
-  quick.innerHTML = P.QUICK.map(function (x, n) { return '<a class="chip" href="#t=' + n + '">' + esc(x[0]) + '</a>'; }).join("");
+  quick.innerHTML = P.QUICK.map(function (x, n) { return '<a class="chip" href="#sit-' + (n + 1) + '">' + esc(x[0]) + '</a>'; }).join("");
 
   function situation(n) {
     var x = P.QUICK[n]; if (!x) return home();
@@ -67,15 +67,15 @@
     var helpers = [
       ["chto-delat.html", "Не знаете, какой документ нужен?", "Ответьте на пару вопросов — подберём документы и порядок действий"],
       ["proverka.html", "Проверь себя за 5 минут", "Долги у приставов, штрафы, кредиты на ваше имя — на официальных сайтах"],
-      ["#s=calc", "Калькуляторы", "Неустойка, проценты, госпошлина, вычет, отпускные, исковая давность"],
+      ["#calc", "Калькуляторы", "Неустойка, проценты, госпошлина, вычет, отпускные, исковая давность"],
       ["pro.html", "Для бизнеса", "Договоры, акты и счета для ИП, ООО и самозанятых"],
     ].map(function (x) { return '<a class="hcard" href="' + x[0] + '"><strong>' + esc(x[1]) + '</strong><span>' + esc(x[2]) + '</span></a>'; }).join("");
     var secs = P.sections(C).map(function (s) {
       var n = live(s.key); if (!n) return "";
       var top = P.itemsOf(C, s.key).own.filter(function (i) { return i.live; }).slice(0, 3);
-      return '<div class="scard"><a class="sc-h" href="#s=' + s.key + '"><h3>' + esc(s.name) + '</h3><span class="sc-n">' + n + '</span></a><p class="lead">' + esc(s.lead) + '</p><ul>' +
+      return '<div class="scard"><a class="sc-h" href="#' + s.key + '"><h3>' + esc(s.name) + '</h3><span class="sc-n">' + n + '</span></a><p class="lead">' + esc(s.lead) + '</p><ul>' +
         top.map(function (i) { return '<li><a href="d/' + i.id + '.html">' + esc(i.title) + '</a></li>'; }).join("") + '</ul>' +
-        (n > 3 ? '<a class="sc-all" href="#s=' + s.key + '">Все ' + n + ' →</a>' : '') + '</div>';
+        (n > 3 ? '<a class="sc-all" href="#' + s.key + '">Все ' + n + ' →</a>' : '') + '</div>';
     }).join("");
     return '<section class="block"><h2>Популярное</h2><div class="pop-grid">' + pop + '</div></section>' +
       '<section class="block"><div class="help-grid">' + helpers + '</div></section>' +
@@ -113,9 +113,9 @@
 
   function render() {
     var term = q.value.trim().toLowerCase();
-    var m = /^#s=(\w+)$/.exec(location.hash), mt = /^#t=(\d+)$/.exec(location.hash);
+    var h = location.hash.slice(1), mt = /^sit-(\d+)$/.exec(h), m = !mt && h && h !== "all" && C.sections.some(function (x) { return x.key === h; });
     root.className = "home";
-    root.innerHTML = term ? results(term) : location.hash === "#all" ? all() : m ? section(m[1]) : mt ? situation(+mt[1]) : home();
+    root.innerHTML = term ? results(term) : location.hash === "#all" ? all() : m ? section(h) : mt ? situation(+mt[1] - 1) : home();
   }
   root.addEventListener("click", function (e) {
     var b = e.target.closest("button[data-t]"); if (!b) return;

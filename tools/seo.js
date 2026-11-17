@@ -100,12 +100,12 @@ for (const f of pages) {
   const item = CAT.C.items.find(i => i.id === spec.id);
   const sec = item && CAT.C.sections.find(s => s.key === item.section);
   if (sec) {
-    html = put(html, "crumbs", `  <nav class="crumbs" aria-label="Вы здесь"><a href="../index.html">Главная</a> › <a href="../index.html#s=${sec.key}">${esc(sec.name)}</a></nav>`,
+    html = put(html, "crumbs", `  <nav class="crumbs" aria-label="Вы здесь"><a href="../index.html">Главная</a> › <a href="../index.html#${sec.key}">${esc(sec.name)}</a></nav>`,
       (h, b) => h.replace(/(  <div class="doc-head" id="head">)/, `${b}$1`));
     const rel = CAT.P.related(CAT.C, spec.id, 6);
     if (rel.length) html = put(html, "related", `  <section class="related sec"><h2>Ещё в разделе «${esc(sec.name)}»</h2><ul>` +
       rel.map(i => `<li><a href="${i.id}.html"><span class="t">${esc(i.title)}</span><span class="tag${i.kind === "calc" ? " calc\">посчитать" : "\">составить"}</span></a></li>`).join("") +
-      `</ul><p class="lead"><a href="../index.html#s=${sec.key}">Все документы раздела →</a></p></section>`,
+      `</ul><p class="lead"><a href="../index.html#${sec.key}">Все документы раздела →</a></p></section>`,
       (h, b) => h.replace(/(  <footer class="site">)/, `${b}$1`));
   }
   fs.writeFileSync(file, html);
