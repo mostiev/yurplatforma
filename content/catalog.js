@@ -16,7 +16,7 @@ window.CATALOG = {
     {"id": "d09", "code": "Д-09", "title": "Претензия туроператору", "section": "consumer", "kind": "doc", "live": true},
     {"id": "d10", "code": "Д-10", "title": "Претензия автосервису", "section": "consumer", "kind": "doc", "live": true},
     {"id": "d11", "code": "Д-11", "title": "Возврат за платные медуслуги и стоматологию", "section": "consumer", "kind": "doc", "live": true},
-    {"id": "d12", "code": "Д-12", "title": "Договор найма квартиры: конструктор с описью и распиской", "section": "housing", "kind": "doc", "live": true},
+    {"id": "d12", "code": "Д-12", "title": "Договор аренды (найма) квартиры с описью и распиской", "section": "housing", "kind": "doc", "live": true},
     {"id": "d67", "code": "Д-67", "title": "Выезд и расторжение договора найма", "section": "housing", "kind": "doc", "live": true},
     {"id": "d68", "code": "Д-68", "title": "Договор услуг или подряда между компаниями и ИП", "section": "business", "kind": "doc", "live": true},
     {"id": "d69", "code": "Д-69", "title": "Договор поставки", "section": "business", "kind": "doc", "live": true},

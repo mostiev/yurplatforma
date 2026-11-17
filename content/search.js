@@ -146,15 +146,19 @@
     const sec = Object.fromEntries(catalog.sections.map(s => [s.key, s.name + " " + s.lead]));
     return catalog.items.filter(i => i.live).map(i => {
       const title = words(i.title), kw = words(KW[i.id]), s = words(sec[i.section]);
+      // за каждое слово запроса — лучшее из совпадений (название 3, живые формулировки 2, раздел 1)
+      // и +2 за само совпадение: документ, где нашлись все слова, выше документа, где одно слово в названии
       let score = 0;
       for (const w of q) {
         const hit = arr => arr.some(x => x === w || (w.length >= 4 && (x.startsWith(w) || w.startsWith(x)) && Math.min(x.length, w.length) >= 4));
-        if (hit(title)) score += 3;
-        if (hit(kw)) score += 2;
-        if (hit(s)) score += 1;
+        const best = hit(title) ? 3 : hit(kw) ? 2 : hit(s) ? 1 : 0;
+        if (best) score += best + 2;
       }
       return { item: i, score };
-    }).filter(x => x.score > 0).sort((a, b) => b.score - a.score).slice(0, limit || 8).map(x => x.item);
+    }).filter(x => x.score > 0)
+      // при равенстве — что чаще ищут (content/popular.js, если подключён)
+      .sort((a, b) => b.score - a.score || (global.POPULAR ? global.POPULAR.score(b.item.id) - global.POPULAR.score(a.item.id) : 0))
+      .slice(0, limit || 8).map(x => x.item);
   }
 
   // тип документа для фильтра на главной — по названию

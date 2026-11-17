@@ -62,6 +62,12 @@ for (const rel of ["index.html", "chto-delat.html", "proverka.html", "pro.html",
   html = put(html, "legal",`<nav class="legal"><a href="${up}usloviya.html">Условия использования</a> · <a href="${up}privacy.html">Политика конфиденциальности</a></nav>`, (h, b) => h.replace(/<\/footer>/, b + "</footer>"));
   fs.writeFileSync(file, html);
 }
+// каталог и спрос — для хлебных крошек, «Похожих документов» и порядка на главной
+const CAT = (() => {
+  const ctx = { console }; ctx.globalThis = ctx; ctx.window = ctx; vm.createContext(ctx);
+  for (const f of ["content/catalog.js", "content/popular.js"]) vm.runInContext(fs.readFileSync(path.join(root, f), "utf8"), ctx);
+  return { C: ctx.CATALOG, P: ctx.POPULAR };
+})();
 const urls = ["index.html", "chto-delat.html", "proverka.html", "pro.html", "oferta.html", "usloviya.html", "privacy.html"];
 let n = 0;
 for (const f of pages) {
@@ -90,6 +96,18 @@ for (const f of pages) {
     (law ? `<p><strong>Правовая основа:</strong> ${esc(law)}</p>` : "") +
     `<p>${calc ? "Расчёт выполняется" : "Документ собирается"} в браузере, ответы никуда не отправляются. ${spec.status === "draft" ? "Черновик: ещё не проверен юристом." : ""}</p></details>\n`;
   html = put(html, "about", about, (h, b) => h.replace(/(  <div id="app"><\/div>\n)/, `$1${b}`));
+  // хлебные крошки и «Похожие документы» — из каталога (порядок — по спросу, content/popular.js)
+  const item = CAT.C.items.find(i => i.id === spec.id);
+  const sec = item && CAT.C.sections.find(s => s.key === item.section);
+  if (sec) {
+    html = put(html, "crumbs", `  <nav class="crumbs" aria-label="Вы здесь"><a href="../index.html">Главная</a> › <a href="../index.html#s=${sec.key}">${esc(sec.name)}</a></nav>`,
+      (h, b) => h.replace(/(  <div class="doc-head" id="head">)/, `${b}$1`));
+    const rel = CAT.P.related(CAT.C, spec.id, 6);
+    if (rel.length) html = put(html, "related", `  <section class="related sec"><h2>Ещё в разделе «${esc(sec.name)}»</h2><ul>` +
+      rel.map(i => `<li><a href="${i.id}.html"><span class="t">${esc(i.title)}</span><span class="tag${i.kind === "calc" ? " calc\">посчитать" : "\">составить"}</span></a></li>`).join("") +
+      `</ul><p class="lead"><a href="../index.html#s=${sec.key}">Все документы раздела →</a></p></section>`,
+      (h, b) => h.replace(/(  <footer class="site">)/, `${b}$1`));
+  }
   fs.writeFileSync(file, html);
   urls.push("d/" + f);
   n++;
@@ -100,8 +118,8 @@ for (const f of pages) {
   const ctx = { console }; ctx.globalThis = ctx; ctx.window = ctx; vm.createContext(ctx);
   vm.runInContext(fs.readFileSync(path.join(root, "content/catalog.js"), "utf8"), ctx);
   const C = ctx.CATALOG;
-  const list = C.sections.map(s => {
-    const items = C.items.filter(i => i.section === s.key && i.live);
+  const list = CAT.P.sections(C).map(s => {
+    const items = CAT.P.sortItems(C.items.filter(i => i.section === s.key && i.live), C.items);
     return items.length ? `<section class="sec"><h2>${esc(s.name)}</h2><ul>${items.map(i => `<li><a href="d/${i.id}.html">${esc(i.title)}</a></li>`).join("")}</ul></section>` : "";
   }).join("");
   const file = path.join(root, "index.html");
