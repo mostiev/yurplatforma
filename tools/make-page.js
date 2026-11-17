@@ -35,6 +35,7 @@ ${calc ? "" : `<script src="../assets/docx.js?v=${V}"></script>\n`}<script src="
 <script src="../assets/calendar.js?v=${V}"></script>
 <script src="../assets/common.js?v=${V}"></script>
 ${calc ? "" : `<script src="../assets/suggest.js?v=${V}"></script>\n`}${calc ? `<script src="../assets/calc.js?v=${V}"></script>\n` : ""}${base ? `<script src="../content/${base}.js?v=${V}"></script>\n` : ""}<script src="../content/${id}.js?v=${V}"></script>
+<script src="../assets/pro.js?v=${V}"></script>
 <script src="../assets/page.js?v=${V}"></script>
 </body>
 </html>

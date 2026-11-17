@@ -320,3 +320,23 @@ footer.site { border-top: 1px solid var(--line); padding-block: 20px 32px; color
 .field-w { border: 1px solid var(--warn-soft-line); border-radius: 8px; padding: 6px 10px; }
 .next-steps { border-color: var(--accent-line); background: var(--surface); padding: 14px 16px; }
 .sg-list { border-radius: var(--radius-sm); box-shadow: var(--shadow); }
+/* «Сказать спасибо», «Мои компании», тариф «Бизнес» (assets/pro.js, pro.html) */
+.thanks { margin: 16px 0 0; padding: 12px 14px; border: 1px dashed var(--accent-line); border-radius: var(--radius-sm); background: var(--accent-soft); }
+.thanks p { margin: 0 0 8px; font-size: 14px; }
+.companies { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 4px 0 14px; font-size: 14px; color: var(--muted); }
+.plans { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin: 16px 0 24px; }
+.plan { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; }
+.plan.main { border-color: var(--accent); box-shadow: var(--shadow); }
+.plan h3 { margin: 0 0 4px; }
+.plan .price { font-size: 26px; font-weight: 700; margin: 4px 0 10px; }
+.plan ul { margin: 0 0 14px; padding-left: 18px; font-size: 15px; }
+.pro-box { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; margin: 0 0 18px; }
+.pro-box h2 { margin-top: 0; font-size: 20px; }
+.pro-box input[type=text], .pro-box textarea, .pro-box select { width: 100%; font: inherit; padding: 8px 10px; border: 1px solid var(--line-strong); border-radius: 8px; background: var(--surface); color: var(--ink); }
+.pro-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 10px 0; }
+.pro-grid label { font-size: 13px; color: var(--muted); display: block; }
+.co-list { list-style: none; padding: 0; margin: 10px 0; }
+.co-list li { display: flex; justify-content: space-between; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.status-ok { color: var(--ok); font-weight: 600; }
+.status-err { color: var(--err); }
+.logo-prev { max-height: 60px; max-width: 200px; display: block; margin: 8px 0; }

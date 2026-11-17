@@ -141,11 +141,28 @@
     return paragraphXml(p);
   }
 
-  function buildDocx(paragraphs) {
-    const body = paragraphs.map(blockXml).join("");
+  // логотип в начале документа: opts.logo = { bytes: Uint8Array, ext: "png" | "jpeg", w, h } (размер в пикселях)
+  // вписывается в 4,5 × 1,6 см с сохранением пропорций
+  function logoXml(l) {
+    const EMU = 9525, maxW = 1620000, maxH = 576000;
+    let cx = Math.max(1, l.w || 300) * EMU, cy = Math.max(1, l.h || 100) * EMU;
+    const k = Math.min(1, maxW / cx, maxH / cy); cx = Math.round(cx * k); cy = Math.round(cy * k);
+    return `<w:p><w:pPr><w:spacing w:after="240"/></w:pPr><w:r><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0">` +
+      `<wp:extent cx="${cx}" cy="${cy}"/><wp:docPr id="1" name="Логотип"/>` +
+      `<a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture">` +
+      `<pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="1" name="logo.${l.ext}"/><pic:cNvPicPr/></pic:nvPicPr>` +
+      `<pic:blipFill><a:blip r:embed="rIdLogo"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill>` +
+      `<pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${cx}" cy="${cy}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic>` +
+      `</a:graphicData></a:graphic></wp:inline></w:drawing></w:r></w:p>`;
+  }
+
+  function buildDocx(paragraphs, opts) {
+    const o = opts || {};
+    const logo = o.logo && o.logo.bytes && o.logo.bytes.length && (o.logo.ext === "png" || o.logo.ext === "jpeg") ? o.logo : null;
+    const body = (logo ? logoXml(logo) : "") + paragraphs.map(blockXml).join("");
     const documentXml =
       `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>` +
-      `<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">` +
+      `<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing">` +
       `<w:body>${body}<w:sectPr><w:pgSz w:w="11906" w:h="16838"/>` +
       `<w:pgMar w:top="1134" w:right="850" w:bottom="1134" w:left="1701" w:header="709" w:footer="709" w:gutter="0"/></w:sectPr>` +
       `</w:body></w:document>`;
@@ -154,6 +171,7 @@
       `<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">` +
       `<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>` +
       `<Default Extension="xml" ContentType="application/xml"/>` +
+      (logo ? `<Default Extension="${logo.ext}" ContentType="image/${logo.ext}"/>` : "") +
       `<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>` +
       `<Override PartName="/word/settings.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.settings+xml"/>` +
       `</Types>`;
@@ -167,6 +185,7 @@
       `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>` +
       `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">` +
       `<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/settings" Target="settings.xml"/>` +
+      (logo ? `<Relationship Id="rIdLogo" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/logo.${logo.ext}"/>` : "") +
       `</Relationships>`;
     const rels =
       `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>` +
@@ -179,6 +198,7 @@
       { name: "word/document.xml", data: documentXml },
       { name: "word/_rels/document.xml.rels", data: docRels },
       { name: "word/settings.xml", data: settingsXml },
+      ...(logo ? [{ name: `word/media/logo.${logo.ext}`, data: logo.bytes }] : []),
     ]);
   }
 

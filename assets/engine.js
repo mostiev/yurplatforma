@@ -514,6 +514,7 @@
             h("span", { class: "n" }, String(i + 1)), h("span", { class: "t" }, typeof s.title === "function" ? s.title(a, d) : s.title)))),
         h("h2", { class: "step-title" }, typeof step.title === "function" ? step.title(a, d) : step.title),
         step.lead ? h("p", { class: "step-lead" }, step.lead) : null,
+        companiesBar(step),
         visibleQuestions(spec, step, a, d).map(q => field(q, d, errs)),
         stop ? stopBox(stop) : null,
         h("div", { class: "nav" },
@@ -555,6 +556,31 @@
       return out;
     }
 
+    // «Мои компании» (assets/pro.js): хранятся только в этом браузере
+    const PARTIES = global.Pro ? global.Pro.parties(spec) : [];
+    function companiesBar(step) {
+      const PR = global.Pro;
+      const here = PARTIES.filter(pt => pt.step === step);
+      const list = PR && here.length ? PR.companies.list() : [];
+      if (!list.length) return null;
+      return here.map(pt => h("div", { class: "companies" }, h("span", { class: "h" }, `${pt.role}: подставить из сохранённых — `),
+        list.map(c => h("button", { type: "button", class: "chip", onclick: () => {
+          Object.assign(state.a, PR.companies.toAnswers(c, pt.p, pt.mode));
+          prune(spec, state.a); renderForm(false); renderPreview();
+        } }, PR.companies.label(c)))));
+    }
+    function companiesSave(a) {
+      const PR = global.Pro;
+      if (!PR || !PARTIES.length) return null;
+      const list = PR.companies.list();
+      const fresh = PARTIES.map(pt => ({ pt, c: PR.companies.fromAnswers(a, pt.p, pt.mode) }))
+        .filter(x => x.c.name && !list.some(c => c.name === x.c.name && (c.inn || "") === (x.c.inn || "")));
+      if (!fresh.length) return null;
+      if (!PR.companies.canAdd()) return h("p", { class: "mydata" }, h("span", { class: "h" }, `Бесплатно можно сохранить ${PR.FREE_LIMIT === 1 ? "одну компанию" : PR.FREE_LIMIT + " компании"}. Сколько угодно компаний и контрагентов — в `), h("a", { href: "../pro.html" }, "тарифе «Бизнес»"), h("span", { class: "h" }, "."));
+      return h("p", { class: "mydata" }, fresh.map(x => h("button", { type: "button", class: "btn ghost sm", onclick: () => { PR.companies.save(Object.assign({ role: x.pt.mode === "freelancer" ? "mine" : "other" }, x.c)); renderForm(false); } }, `Запомнить «${PR.companies.label(x.c)}»`)),
+        h("span", { class: "h" }, " Только в этом браузере — подставится в другие договоры, акты и счета."));
+    }
+
     function renderDone(d) {
       const a = state.a;
       const ps = spec.render(a, d);
@@ -573,7 +599,8 @@
           h("button", {
             class: "btn", type: "button",
             onclick: () => {
-              const bytes = Docx.buildDocx(ps);
+              const PR = global.Pro, mk = PR ? PR.mark(spec.id) : null;
+              const bytes = Docx.buildDocx(mk ? ps.concat([mk]) : ps, PR ? PR.docxOptions(spec.id) : {});
               const blob = new Blob([bytes], { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
               const url = URL.createObjectURL(blob);
               const link = h("a", { href: url, download: (spec.fileName ? spec.fileName(a, d) : spec.id) + ".docx" });
@@ -592,6 +619,9 @@
             setTimeout(() => URL.revokeObjectURL(url), 4000);
           } }, "Опись вложения (ф. 107)"),
           h("button", { class: "btn ghost", type: "button", onclick: () => { state.done = false; state.step = spec.steps.filter(s => !s.show || s.show(state.a, spec.derive(state.a))).length - 1; renderForm(true); } }, "Изменить ответы")),
+        global.Pro && global.Pro.mark(spec.id) ? h("p", { class: "mydata" }, h("span", { class: "h" }, `В конце файла будет строка «Составлено на ${global.Pro.CONFIG.SITE}». Без неё и с вашим логотипом — в `), h("a", { href: "../pro.html" }, "тарифе «Бизнес»"), h("span", { class: "h" }, ".")) : null,
+        companiesSave(a),
+        global.Pro ? global.Pro.thanksBlock(h, spec.id) : null,
         (() => {
           const mine = PROFILE_KEYS.filter(k => allIds.has(k) && a[k]);
           if (!mine.length) return null;
@@ -657,6 +687,8 @@
 
     renderForm(false);
     renderPreview();
+    if (global.Pro && global.Pro.ready && global.Pro.ready.then) global.Pro.ready.then(() => { if (global.Pro.active) renderForm(false); });
+    state.rerender = () => { renderForm(false); renderPreview(); }; // для проверок и внешних кнопок
     return state;
   }
 

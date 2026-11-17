@@ -47,7 +47,7 @@ function loadSpec(htmlFile) {
 const pages = fs.readdirSync(path.join(root, "d")).filter(f => f.endsWith(".html"));
 
 // приватность: никаких запросов к сторонним серверам (Google Fonts убраны), ссылки на соглашение и политику в подвале
-for (const rel of ["index.html", "chto-delat.html", "proverka.html", "usloviya.html", "privacy.html", "404.html", ...pages.map(f => "d/" + f)]) {
+for (const rel of ["index.html", "chto-delat.html", "proverka.html", "pro.html", "oferta.html", "usloviya.html", "privacy.html", "404.html", ...pages.map(f => "d/" + f)]) {
   const file = path.join(root, rel);
   if (!fs.existsSync(file)) continue;
   const up = rel === "404.html" ? "/" : rel.startsWith("d/") ? "../" : "";
@@ -56,13 +56,13 @@ for (const rel of ["index.html", "chto-delat.html", "proverka.html", "usloviya.h
     .replace(/<link rel="stylesheet" href="https:\/\/fonts\.googleapis\.com[^>]*>\n/g, "");
   html = put(html, "icon", `<link rel="icon" href="${up}favicon.svg" type="image/svg+xml">\n`, (h, b) => h.replace(/(<link rel="stylesheet")/, b + "$1"));
   // единое меню в шапке: три раздела, текущий отмечен
-  const NAV = [["index.html", "Все документы"], ["chto-delat.html", "Что делать, если…"], ["proverka.html", "Проверь себя"]];
+  const NAV = [["index.html", "Все документы"], ["chto-delat.html", "Что делать, если…"], ["proverka.html", "Проверь себя"], ["pro.html", "Для бизнеса"]];
   html = html.replace(/(<header class="top">[\s\S]*?)<nav[^>]*>[\s\S]*?<\/nav>/, (m, pre) => pre + `<nav aria-label="Разделы">` +
     NAV.map(([h, t]) => `<a href="${up}${h}"${rel === h ? ' aria-current="page"' : ""}>${t}</a>`).join("") + `</nav>`);
   html = put(html, "legal",`<nav class="legal"><a href="${up}usloviya.html">Условия использования</a> · <a href="${up}privacy.html">Политика конфиденциальности</a></nav>`, (h, b) => h.replace(/<\/footer>/, b + "</footer>"));
   fs.writeFileSync(file, html);
 }
-const urls = ["index.html", "chto-delat.html", "proverka.html", "usloviya.html", "privacy.html"];
+const urls = ["index.html", "chto-delat.html", "proverka.html", "pro.html", "oferta.html", "usloviya.html", "privacy.html"];
 let n = 0;
 for (const f of pages) {
   const file = path.join(root, "d", f);

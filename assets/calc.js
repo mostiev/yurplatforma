@@ -93,6 +93,9 @@
         try { await navigator.clipboard.writeText(text); copy.textContent = "Скопировано"; } catch (_) { copy.textContent = "Не вышло — выделите текст"; }
       } }, "Скопировать расчёт");
       card.append(h("div", { class: "done-actions" }, copy, (r.related || []).map(x => h("a", { class: "btn", href: x.id + ".html", onclick: () => handoff(x) }, x.text + (x.fill ? " — с этими данными" : "")))));
+      const big = (r.summary || []).some(x => x.big && /₽/.test(String(x.value)) && !/^0\s?₽$/.test(String(x.value).trim()));
+      const ty = global.Pro ? global.Pro.thanksBlock(h, spec.id, big) : null;
+      if (ty) card.append(ty);
       $res.append(card);
     }
 

@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Тариф «Бизнес» — договоры, акты и счета для ИП, ООО и самозанятых</title>
+<meta name="description" content="Все документы — бесплатно. Тариф «Бизнес»: ваш логотип в документах, без отметки сайта, сколько угодно своих компаний и контрагентов. Данные хранятся только в вашем браузере.">
+<!--seo:icon--><link rel="icon" href="favicon.svg" type="image/svg+xml">
+<!--/seo:icon-->
+<link rel="stylesheet" href="assets/site.css?v=202611171315">
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="logo" href="index.html">юр<span>платформа</span></a>
+    <nav aria-label="Разделы"><a href="index.html">Все документы</a><a href="chto-delat.html">Что делать, если…</a><a href="proverka.html">Проверь себя</a><a href="pro.html" aria-current="page">Для бизнеса</a></nav>
+  </header>
+
+  <section class="hero">
+    <h1>Тариф «Бизнес»</h1>
+    <p>Для ИП, ООО и самозанятых, которые делают договоры, акты и счета регулярно. Все документы на сайте остаются бесплатными — тариф добавляет удобство.</p>
+  </section>
+
+  <main>
+    <div class="plans">
+      <div class="plan">
+        <h3>Бесплатно</h3>
+        <div class="price">0 ₽</div>
+        <ul>
+          <li>Все документы и калькуляторы сайта</li>
+          <li>Одна сохранённая компания</li>
+          <li>В конце договоров, актов и счетов — строка «Составлено на yurplatform.ru»</li>
+        </ul>
+      </div>
+      <div class="plan main">
+        <h3>Бизнес</h3>
+        <div class="price" id="price"></div>
+        <ul>
+          <li>Без строки «Составлено на…»</li>
+          <li>Ваш логотип в начале документа</li>
+          <li>Сколько угодно своих компаний и контрагентов — реквизиты подставляются одной кнопкой</li>
+          <li>Скоро: счета и акты пачкой из таблицы</li>
+        </ul>
+        <div class="done-actions" id="buy"></div>
+        <p class="mydata" id="howbuy"></p>
+      </div>
+    </div>
+
+    <section class="pro-box">
+      <h2>Ключ</h2>
+      <p class="mydata">После оплаты пришлём ключ на почту из чека. Вставьте его сюда — тариф включится в этом браузере. Ключ проверяется прямо на устройстве, анкеты по-прежнему никуда не отправляются.</p>
+      <div id="keystate"></div>
+      <div class="pro-grid"><div><input type="text" id="key" placeholder="YP-…" autocomplete="off" spellcheck="false"></div><div><button class="btn" type="button" id="activate">Включить</button></div></div>
+      <p id="keymsg" class="mydata"></p>
+    </section>
+
+    <section class="pro-box">
+      <h2>Мои компании и контрагенты</h2>
+      <p class="mydata">Хранятся только в этом браузере. В договорах, актах и счетах появится кнопка «подставить из сохранённых». Ещё проще — заполните документ как обычно и нажмите «Запомнить» на экране готового документа.</p>
+      <ul class="co-list" id="colist"></ul>
+      <details id="coadd"><summary>Добавить вручную</summary>
+        <div class="pro-grid">
+          <div><label for="c_kind">Кто это</label><select id="c_kind"><option value="org">Организация</option><option value="ip">ИП</option><option value="self">Самозанятый</option><option value="person">Физическое лицо</option></select></div>
+          <div><label for="c_name">Название или ФИО</label><input type="text" id="c_name"></div>
+          <div><label for="c_inn">ИНН</label><input type="text" id="c_inn" inputmode="numeric"></div>
+          <div><label for="c_ogrn">ОГРН / ОГРНИП</label><input type="text" id="c_ogrn" inputmode="numeric"></div>
+          <div><label for="c_kpp">КПП</label><input type="text" id="c_kpp" inputmode="numeric"></div>
+          <div><label for="c_address">Адрес</label><input type="text" id="c_address"></div>
+          <div><label for="c_head_pos">Должность подписанта</label><input type="text" id="c_head_pos" placeholder="Генеральный директор"></div>
+          <div><label for="c_head">ФИО подписанта</label><input type="text" id="c_head"></div>
+          <div><label for="c_basis">Действует на основании</label><input type="text" id="c_basis" placeholder="Устава"></div>
+          <div><label for="c_email">E-mail</label><input type="text" id="c_email"></div>
+          <div><label for="c_phone">Телефон</label><input type="text" id="c_phone"></div>
+          <div><label for="c_bank">Банк</label><input type="text" id="c_bank"></div>
+          <div><label for="c_account">Расчётный счёт</label><input type="text" id="c_account" inputmode="numeric"></div>
+          <div><label for="c_bik">БИК</label><input type="text" id="c_bik" inputmode="numeric"></div>
+        </div>
+        <button class="btn" type="button" id="cosave">Сохранить</button> <span id="comsg" class="mydata"></span>
+      </details>
+    </section>
+
+    <section class="pro-box">
+      <h2>Логотип</h2>
+      <p class="mydata">PNG или JPEG до 300 КБ. Появится в начале договоров, актов и счетов, если включён тариф.</p>
+      <div id="logobox"></div>
+      <input type="file" id="logo" accept="image/png,image/jpeg">
+      <p id="logomsg" class="mydata"></p>
+    </section>
+
+    <p class="mydata">Оплачивая тариф, вы принимаете <a href="oferta.html">условия тарифа</a>. Тариф не продлевается автоматически: деньги спишутся один раз, за месяц или год. <button type="button" class="sg-off" id="wipe">Стереть ключ, компании и логотип из этого браузера</button></p>
+  </main>
+
+  <footer class="site">Данные компаний, логотип и ключ хранятся только в этом браузере. Мы их не получаем.<!--seo:legal--><nav class="legal"><a href="usloviya.html">Условия использования</a> · <a href="privacy.html">Политика конфиденциальности</a></nav><!--/seo:legal-->
+</footer>
+</div>
+<script src="assets/pro.js?v=202611171315"></script>
+<script>
+(function () {
+  "use strict";
+  var P = window.Pro, C = P.CONFIG;
+  var $ = function (id) { return document.getElementById(id); };
+  function el(tag, attrs, text) { var e = document.createElement(tag); for (var k in attrs || {}) e.setAttribute(k, attrs[k]); if (text != null) e.textContent = text; return e; }
+  function money(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, " "); }
+
+  $("price").textContent = money(C.PRICE_MONTH) + " ₽ в месяц";
+  var buy = $("buy");
+  if (C.BUY_MONTH_URL || C.BUY_YEAR_URL) {
+    if (C.BUY_MONTH_URL) buy.appendChild(el("a", { class: "btn", href: C.BUY_MONTH_URL, target: "_blank", rel: "noopener noreferrer" }, "Месяц — " + money(C.PRICE_MONTH) + " ₽"));
+    if (C.BUY_YEAR_URL) buy.appendChild(el("a", { class: "btn ghost", href: C.BUY_YEAR_URL, target: "_blank", rel: "noopener noreferrer" }, "Год — " + money(C.PRICE_YEAR) + " ₽"));
+    $("howbuy").textContent = "Ключ придёт на почту в течение суток" + (C.CONTACT ? ". Не пришёл — напишите на " + C.CONTACT : "") + ".";
+  } else {
+    buy.appendChild(el("button", { class: "btn", type: "button", disabled: "disabled" }, "Оплата скоро"));
+    $("howbuy").textContent = "Год — " + money(C.PRICE_YEAR) + " ₽ (два месяца в подарок).";
+  }
+
+  function keyState() {
+    var box = $("keystate"); box.textContent = "";
+    if (P.active && P.info) box.appendChild(el("p", { class: "status-ok" }, "Тариф включён до " + P.info.exp.toLocaleDateString("ru-RU") + (P.info.name ? " — " + P.info.name : "")));
+    else if (P.info && P.info.expired) box.appendChild(el("p", { class: "status-err" }, P.info.why + " Продлите тариф, чтобы снова включить логотип и убрать строку."));
+    else box.appendChild(el("p", { class: "mydata" }, "Сейчас — бесплатная версия."));
+    renderCompanies(); renderLogo();
+  }
+  $("activate").onclick = function () {
+    $("keymsg").textContent = "Проверяем…";
+    P.activate($("key").value).then(function (r) { $("keymsg").textContent = r.ok ? "Готово." : r.why; if (r.ok) $("key").value = ""; keyState(); });
+  };
+
+  var KIND = { org: "", ip: "ИП", self: "самозанятый", person: "физлицо" };
+  function renderCompanies() {
+    var ul = $("colist"); ul.textContent = "";
+    var list = P.companies.list();
+    if (!list.length) ul.appendChild(el("li", {}, "Пока ничего не сохранено."));
+    list.forEach(function (c) {
+      var li = el("li"); li.appendChild(el("span", {}, P.companies.label(c) + (c.kind !== "org" && c.kind !== "ip" ? " (" + KIND[c.kind] + ")" : "")));
+      var b = el("button", { type: "button", class: "sg-off" }, "удалить"); b.onclick = function () { P.companies.remove(c.id); renderCompanies(); };
+      li.appendChild(b); ul.appendChild(li);
+    });
+    var can = P.companies.canAdd();
+    $("cosave").disabled = !can;
+    $("comsg").textContent = can ? "" : "Бесплатно — одна компания. Больше — в тарифе «Бизнес».";
+  }
+  $("cosave").onclick = function () {
+    var c = {}; ["kind", "name", "inn", "ogrn", "kpp", "address", "head_pos", "head", "basis", "email", "phone", "bank", "account", "bik"].forEach(function (f) { var v = $("c_" + f).value.trim(); if (v) c[f] = v; });
+    if (!c.name) { $("comsg").textContent = "Укажите название или ФИО."; return; }
+    if (P.companies.save(c)) { ["name", "inn", "ogrn", "kpp", "address", "head_pos", "head", "basis", "email", "phone", "bank", "account", "bik"].forEach(function (f) { $("c_" + f).value = ""; }); $("comsg").textContent = "Сохранено."; }
+    renderCompanies();
+  };
+
+  function renderLogo() {
+    var box = $("logobox"); box.textContent = "";
+    var l = P.logo.get();
+    if (l && l.data) {
+      box.appendChild(el("img", { class: "logo-prev", src: l.data, alt: "Логотип" }));
+      var b = el("button", { type: "button", class: "sg-off" }, "убрать логотип"); b.onclick = function () { P.logo.clear(); renderLogo(); };
+      box.appendChild(b);
+      if (!P.active) box.appendChild(el("p", { class: "mydata" }, "Логотип сохранён, но появится в документах, когда включите тариф."));
+    }
+  }
+  $("logo").onchange = function (e) {
+    var f = e.target.files && e.target.files[0];
+    if (!f) return;
+    if (!/^image\/(png|jpeg)$/.test(f.type)) { $("logomsg").textContent = "Нужен PNG или JPEG."; return; }
+    if (f.size > 300 * 1024) { $("logomsg").textContent = "Файл больше 300 КБ — уменьшите картинку."; return; }
+    var rd = new FileReader();
+    rd.onload = function () {
+      var img = new Image();
+      img.onload = function () { $("logomsg").textContent = P.logo.set({ data: rd.result, w: img.naturalWidth, h: img.naturalHeight }) ? "Сохранено." : "Не удалось сохранить: в браузере мало места."; renderLogo(); };
+      img.src = rd.result;
+    };
+    rd.readAsDataURL(f);
+  };
+
+  $("wipe").onclick = function () { P.deactivate(); P.companies.clear(); P.logo.clear(); keyState(); };
+  P.ready.then(keyState);
+  keyState();
+})();
+</script>
+</body>
+</html>
