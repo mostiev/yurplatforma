@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Проверь себя за 5 минут — долги, штрафы, кредитная история</title>
+<meta name="description" content="Официальные бесплатные сервисы: долги у приставов, банкротство, штрафы, налоги, кредитная история, самозапрет на кредиты и SIM-карты, реестр контролируемых лиц, наследственные дела.">
+<!--seo:icon--><link rel="icon" href="favicon.svg" type="image/svg+xml">
+<!--/seo:icon-->
+<link rel="stylesheet" href="assets/site.css?v=202611171325">
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="logo" href="index.html">юр<span>платформа</span></a>
+    <nav aria-label="Разделы"><a href="index.html">Все документы</a><a href="chto-delat.html">Что делать, если…</a><a href="proverka.html" aria-current="page">Проверь себя</a><a href="pro.html">Для бизнеса</a></nav>
+  </header>
+
+  <section class="hero">
+    <h1>Проверь себя за 5 минут</h1>
+    <p>Долги у приставов, штрафы, кредиты на ваше имя — на официальных сайтах, бесплатно. Если что-то нашлось, подскажем, что делать.</p>
+  </section>
+
+  <main class="chk">
+    <div class="chk-progress" id="progress" aria-live="polite"></div>
+    <div class="chk-list" id="list"></div>
+    <div class="wz-note" id="note"></div>
+  </main>
+
+  <footer class="site">Ссылки ведут на официальные сайты ведомств. Мы ничего не проверяем за вас и не получаем ваши данные. Отметки «Проверил» хранятся только в этом браузере.<!--seo:legal--><nav class="legal"><a href="usloviya.html">Условия использования</a> · <a href="privacy.html">Политика конфиденциальности</a></nav><!--/seo:legal-->
+</footer>
+</div>
+<script src="content/catalog.js?v=202611171325"></script>
+<script src="content/checks.js?v=202611171325"></script>
+<script>
+(function () {
+  var byId = {};
+  CATALOG.items.forEach(function (i) { byId[i.id] = i; });
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  var KEY = "proverka-done", done = {};
+  try { done = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) { done = {}; }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(done)); } catch (e) { /* без хранилища отметки живут до перезагрузки */ } }
+
+  var list = document.getElementById("list");
+  list.innerHTML = CHECKS.map(function (c, n) {
+    var found = c.found.map(function (f) {
+      var it = f.id && byId[f.id];
+      var link = it && it.live ? ' <a class="wz-link" href="d/' + it.id + '.html">' + esc(it.title) + ' <span class="tag">' + (it.kind === "calc" ? "посчитать" : "составить") + "</span></a>" : "";
+      return "<li>" + esc(f.text) + link + "</li>";
+    }).join("");
+    return '<section class="chk-item" id="' + c.id + '">' +
+      '<div class="chk-head"><span class="chk-n">' + (n + 1) + '</span><h2>' + esc(c.title) + '</h2>' +
+      '<label class="chk-done"><input type="checkbox" data-id="' + c.id + '"' + (done[c.id] ? " checked" : "") + "> Проверил</label></div>" +
+      '<p class="chk-why">' + esc(c.why) + "</p>" +
+      '<ul class="chk-where">' + c.where.map(function (w) {
+        return '<li><a href="' + esc(w.href) + '" target="_blank" rel="noopener noreferrer">' + esc(w.text) + ' ↗</a>' + (w.note ? '<span class="h">' + esc(w.note) + "</span>" : "") + "</li>";
+      }).join("") + "</ul>" +
+      (found ? '<details class="chk-found"><summary>Нашлось — что делать</summary><ul>' + found + "</ul></details>" : "") +
+      "</section>";
+  }).join("");
+  document.getElementById("note").textContent = CHECKS_NOTE;
+
+  function progress() {
+    var k = CHECKS.filter(function (c) { return done[c.id]; }).length;
+    document.getElementById("progress").innerHTML = "<span>Проверено <b>" + k + "</b> из " + CHECKS.length + "</span>" +
+      '<span class="chk-bar"><span style="width:' + Math.round(k / CHECKS.length * 100) + '%"></span></span>';
+    CHECKS.forEach(function (c) { document.getElementById(c.id).classList.toggle("is-done", !!done[c.id]); });
+  }
+  list.addEventListener("change", function (e) {
+    var id = e.target.getAttribute("data-id");
+    if (!id) return;
+    if (e.target.checked) done[id] = 1; else delete done[id];
+    save(); progress();
+  });
+  progress();
+})();
+</script>
+</body>
+</html>
